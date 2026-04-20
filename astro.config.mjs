@@ -46,11 +46,60 @@ export default defineConfig({
 					autogenerate: { directory: 'intro' },
 				},
 				{
-					label: 'Kursmoment',
-					autogenerate: { directory: 'kmom' },
+					label: 'Kom igång',
+					collapsed: true,
+					autogenerate: { directory: 'kom-igang' },
 				},
 				{
-					label: 'Läromaterial',
+					label: 'Kmom01',
+					collapsed: true,
+					autogenerate: { directory: 'kmom01' },
+				},
+				{
+					label: 'Kmom02',
+					collapsed: true,
+					autogenerate: { directory: 'kmom02' },
+				},
+				{
+					label: 'Kmom03',
+					collapsed: true,
+					autogenerate: { directory: 'kmom03' },
+				},
+				{
+					label: 'Kmom04',
+					collapsed: true,
+					autogenerate: { directory: 'kmom04' },
+				},
+				{
+					label: 'Kmom05',
+					collapsed: true,
+					autogenerate: { directory: 'kmom05' },
+				},
+				{
+					label: 'Kmom06',
+					collapsed: true,
+					autogenerate: { directory: 'kmom06' },
+				},
+				{
+					label: 'Kmom10',
+					collapsed: true,
+					autogenerate: { directory: 'kmom10' },
+				},
+				{
+					label: 'Studieguide',
+					collapsed: true,
+					autogenerate: { directory: 'studieguide' },
+					/* items: [
+						{ label: 'Example Guide', slug: 'guides/example' },
+					],*/
+				},
+				{
+					label: 'Övrigt',
+					collapsed: true,
+					autogenerate: { directory: 'ovrigt' },
+				},
+				{
+					label: '(Läromaterial)',
 					collapsed: true,
 					/* autogenerate: { directory: 'laromaterial' }, */
 					items: [
@@ -108,19 +157,6 @@ export default defineConfig({
 							collapsed: true,
 						},
 					],
-				},
-				{
-					label: 'Studieguide',
-					collapsed: true,
-					autogenerate: { directory: 'studieguide' },
-					/* items: [
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],*/
-				},
-				{
-					label: 'Övrigt',
-					collapsed: true,
-					autogenerate: { directory: 'ovrigt' },
 				},
 			],
 		}),
