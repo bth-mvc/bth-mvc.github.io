@@ -1,250 +1,198 @@
 ---
-title: "Kmom01: Databas och SQL" 
-description: Använd en befintlig databas och kom igång med grunderna i SQL.
+title: 'kmom01: TypeScript + Docker'
+description: Sätt upp kursens devmiljö med Docker Compose och bygg de första endpoints i TypeScript.
 revision:
-  2026-01-01: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-* Se över hur setup.sql namngivs i de olika kursmomentens uppgifterna, använd samma upplägg/filnamn konsekvent, tillåt att göra source för att dela upp filer i fler delar.
-    * Behöver nog separera i flera filer så jag slipper skapa databasen via studenters filer
-    * Gör så det blir exakt lika i alla kmom, se hur det ser ut i kmom10
-    * Borde man göra backupfil tidigare, i tex kmom06 för att underlätta rättning i kmom10? (kan lösas av actions från och med kmom08?)
-* Se över namngivning i uppgifter och övningar kontra repot.
-    * Filer, filnamn
-    * Kommandon products versus product
-* Uppdatera template repot med övriga filer
-* Pre-hook innan man gör en tagg?
-* Lägg till actions i template repot, efter varje kmom och efter varje PR?
-* Dubbelkolla kapitelhänvisningar i senaste boken, något kapitel i kmom06 var nog fel nummer?
-* Installation av PUML i vscode vilket kräver Dot. Fundera på om ER/Chen skall  stödjas.
-* Exempelkoden för sub-queries kan behöva bli en egen artikel med fler exempel.
-*
-* Övningar som inte användes:
-    * Classic models database: Customer, orders and orderdetails, https://gitlab.com/mikael-roos/database/-/blob/main/sql/classicmodels/order-order-details/README.md?ref_type=heads
-    * Classic models database: Get going with UNION, JOIN and subquery https://gitlab.com/mikael-roos/database/-/blob/main/sql/classicmodels/join/README.md?ref_type=heads
+Den här veckan startar du från kursens template-repo och sätter upp din devmiljö med Docker Compose. Du lär dig TypeScript-grunderna, konfigurerar Express i TypeScript och bygger de första domänspecifika REST-endpoints. Veckan avslutas med att du validerar miljövariabler med Zod — ett bibliotek du möter igen i kmom02 för att validera inkommande data.
 
-* Allt som ha med namngivning av kataloger och i cli-skriptet.
+## Kom igång
 
-* Lägg till självtest i kmom04-06 för att visa hur det skall fungera.
-* Menyval "clear & ctrl-l" för att rensa skärmen i C#
-* Menyval exit & ctrl-d
-* Hur hantera puml-filerna i C# Bank? Auto generera? Ta bort?
-* Kolla vad som krävs för att ett c# program skall kunna läsa in flera kommandon i en sekvens, från tex en fil
-* schema.pdf kan vara schema.png (eller antingen eller) i kmom06
-* Fundera på hur man kan minska belastningen i kmom05 samt självtest och fundera på hur man kan göra den biten enklare.
-* När man visar secret så skall det inkludera att även visa accounts (enklare rättning)
-* `items` var tydligare vilka delar som skall synas i rapporten och om produkten ligger i inv eller marketplace. Sökning i tex `items` var tydligare med vilka delar som skall vara sökbara, tex namn.
-* Kan man i actions/ish kontrollera om redovisningstexterna är skrivna?
-* Uppdatera vilka filer som kontrolleras i kmom03 (ej de som kan läggas i src/)
-    * Lägg till i programmet så man kollar vissa filer som inte skall vara en del av repot 
-    * KOlla storleken på README så den inte är tom.
-* kmom03, förklara "Funktionstypen Task och asynkront"
-* kmom03, gör kortkommandon för products p och customers c
-* kmom03, i inlämningen, ta med något som kräver att man ritar ett diagram?
-* kmom03 förtydliga hur sökningarna skall ske så kan man ställa högre krav (inkludera även självtester som visar att det fungerar?)
-* kmom06/03, förtydliga att meny inte skall innehålla en "Klicka enter" och menyn skall inte visas automatiskt.
-* kmom03 förtydliga att tabell är nödvändigt
-* kmom04-06 förtydliga hur menyn skall se ut: https://github.com/bth-databas/forum/discussions/10
-* er-dokumentet, skriv in mer text, uppdatera mallen
-* Lägg tilll självtester i varje kmom
-* kmom10. ändra puml till något som kan visas i webbläsaren, pdf (eller png)
-* kmom10 självtest categories, behöver en cat_add för att förenkla tester
-* kmom08 behöver fixas med shelf för att göra mer automatiskt testat, namnge shelfen
-* Förtydliga självtester i samtliga kmom
-* Fixa pilupp i menyprogrammet? samt ctrl-d för avsluta
-* 
-* Förenkla, förenkla, förenkla i alla kmom. Så det blir enklare att förstå och testa. Använd färre parametrar i tabellerna, tex pris (eller använd just pris mer genomgående - ser ju bra ut i fakturan).
-* I varje redovisningstext, lägg till en bild som inkluderas i README, för att visualisera bättre.
-    * I kmom10, lägg till bilder direkt i README (eller Mermaid). Dubbelkolla vad gh pages kan generera, om bara Mermaid eller även puml.
-* I kmom10, förklara om ER-modellen i presentationsvideon, som en del, kanske i inledningen.
-* Behov av flödesdiagram (eller sekvensdiagram) för att visualisera hur uppgifter skall fungera? Bra att väva in fler diagram, även direkt in i README.
-* kmom10, när man betalar en faktura, heter det då "pay" eller "payed"?
-* kmom10 krav 4, när provar vi n2m relationer tidigare i kursen?
-* */}
+Ditt repo är förberett och finns på GitHub. Klona det till din dator:
 
+```bash
+git clone git@github.com:bth-mvc/mvc-<studentakronym>.git
+cd mvc-<studentakronym>
+```
 
+Fortsätt sedan med `README.md` i repot för att installera beroenden och starta upp miljön.
 
-Vi skall jobba med databasen MariaDB som är en relationsdatabas. Som klienter använder vi en terminalbaserad klient och en fönsterbaserad grafisk klient. Klienterna har båda sin plats i vår verktygslåda och de är bra att använda vid olika typer av tillfällen.
+## Issues
 
-I kursen använder vi MariaDB som databas. MariaDB är en "fork" av MySQL och i praktiken är de väldigt lika varandra. MySQL är mer kommersiellt medan MariaDB är mer community-drivet. För kursens syften kan vi betrakta dem som likvärdiga.
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
 
-I en relationsdatabas pratar vi SQL med databasen. SQL är ett deklarativt frågespråk för relationsdatabaser men det finns också inslag av imperativ programmering likt ett "vanligt" programmeringsspråk.
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
-I inledningen skriver vi SQL för att skapa tabeller och för att lägga till, uppdatera, visa och radera data från databasen. När databasserver och klienterna är på plats så kikar vi på en del grundkonstruktioner för SQL.
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 01-10 | `getting-started` | Klona template-repot, förstå strukturen, starta MongoDB med `docker compose up -d mongodb`, kör första SonarQube-scan med `npm run sonar` |
+| 01-20 | `typescript` | Läs och förstå tsconfig-konfigurationen och TypeScript-typerna som redan finns i koden, bygg och kör |
+| 01-30 | `express` | Utöka Express-servern i TypeScript, konfigurera `express.static()` och SPA-fallback för Svelte-appen |
+| 01-35 | `client-exploration` | Registrera ett konto, logga in och utforska frontenden — se vilka sektioner som är låsta och varför |
+| 01-40 | `docker` | Skriv Dockerfile för appen, koppla ihop med MongoDB i docker-compose.yml |
+| 01-50 | `rest` | Bygg de första domänspecifika REST-routes med TypeScript-typer, korrekta statuskoder |
+| 01-60 | `api-doc` | `GET /api/doc` — självbeskrivande endpoint som listar tillgängliga routes; frontenden använder den för att aktivera UI-sektioner |
+| 01-70 | `zod-env` | Validera miljövariabler med Zod vid uppstart — appen ska krascha med ett tydligt felmeddelande om något saknas |
+| 01-75 | `strict` | Aktivera strict mode i TypeScript — industristandardinställningen för nya projekt |
 
-Vi börjar med att använda en befintlig databas som heter "world" som innehåller data om världens länder, städer och kontinenter. Vi skapar SQL-frågor mot databasen för att hämta ut information ur den.
+## Föreläsningar
 
+Titta igenom föreläsningarna innan du börjar med respektive issue. De ger den konceptuella grunden så att koden känns logisk snarare än magisk.
 
+| Titel | Om |
+|---|---|
+| TypeScript för JavaScript-utvecklare | Typer, interfaces, tsconfig — vad som är nytt mot JS |
+| TypeScript-mönster i backend-kod | Literal types, union types, optional fields, `import type` — de mönster som faktiskt dyker upp i issues 01-20 och 01-50 |
+| Docker Compose för Node.js-appar | Dockerfile, compose-fil, nätverk mellan containers |
+| Express i TypeScript | Request/Response-typer, middleware-signaturer, `app.ts`/`index.ts`-split |
+| Zod — schema-driven validering (intro) | Varför schema-validering, `parse()` vs `safeParse()`, env-validering som första use case |
 
-## Läs & Studera
+## Studiematerial
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 01-20 | [TypeScript Handbook — The Basics](https://www.typescriptlang.org/docs/handbook/2/basic-types.html) | Introduktion till TypeScript-typer och vad kompilatorn kontrollerar |
+| Issue 01-40 | [Docker — What is a container?](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/) | Förklarar vad containers är och varför de löser "fungerar på min maskin"-problemet |
+| Issue 01-50 | [Express 5.x — Getting started](https://expressjs.com/en/5x/api.html) | Routing och middleware i Express 5 |
+| Issue 01-70 | [Zod — Getting started](https://zod.dev/?id=basic-usage) | Schema-validering med `parse()` — samma bibliotek används i kmom02 för request-data |
 
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
-### Föreläsning
+| Verktyg | Länk |
+|---|---|
+| TypeScript handbook | [typescriptlang.org/docs/handbook](https://www.typescriptlang.org/docs/handbook/intro.html) |
+| tsconfig.json reference | [typescriptlang.org/tsconfig](https://www.typescriptlang.org/tsconfig) |
+| Docker Compose reference | [docs.docker.com/compose/reference](https://docs.docker.com/compose/reference/) |
+| Zod dokumentation | [zod.dev](https://zod.dev) |
+| Express 5.x API | [expressjs.com/en/5x/api.html](https://expressjs.com/en/5x/api.html) |
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+## Quiz
 
-{/*
-1. [Kursintro](./../forelasning/kursintro) som ger en introduktion till kursens struktur och upplägg samt en översikt av kursens innehåll.
-*/}
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-1. [Introduktion till databaser och relationsdatabaser](/website/laromaterial/forelasning/introduktion-till-databaser-och-relations-databaser/) ger dig en introduktion till begrepp som databas och relationsdatabas.
+Quizen för kmom01 testar om du förstår skillnaden mellan TypeScript och JavaScript, vad en Dockerfile och docker-compose.yml gör, varför `express.static()` behövs för att servera Svelte-appen, vad ett Zod-schema är och vad som händer om en miljövariabel saknas vid uppstart.
 
+## Redovisningstext
 
+Skriv din redovisningstext i `report/kmom01.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
-### Kurslitteratur
+1. Vad är skillnaden mellan `interface` och `type` i TypeScript? Ge ett exempel från din kod.
 
-Läs följande:
+2. Varför behöver en single-page application en SPA-fallback på servern? Beskriv vad som händer om du navigerar direkt till `/portfolio` i webbläsaren utan fallback.
 
-1. Kursboken Databasteknik om MySQL.
-    * Kap 1: Databaser och databashanterare
-    * Kap 7: Introduktion till frågespråket SQL
-    * Kap 29: Introduktion till MySQL (om du har tid och lust)
+3. Förklara din Docker-setup: vad gör `docker-compose.yml` och varför kör du appen i en container snarare än direkt på din dator?
 
-2. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
+4. Vad är `tsconfig.json` och vad händer om du aktiverar `strict: true`?
 
-    * [Introduktion till databaser och databashanterare](http://www.databasteknik.se/webbkursen/databaser/index.html)
-    * [Introduktion till frågespråket SQL](http://www.databasteknik.se/webbkursen/sql/index.html)
-    * [Introduktion till MySQL](http://www.databasteknik.se/webbkursen/mysql/index.html) (om du har tid och lust)
+5. Vad gör ditt Zod-schema för miljövariabler? Vad händer om `JWT_SECRET` saknas när appen startar?
 
+6. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
+## Inlämning
 
-### Artiklar
+1. Stäng de GitHub-issues som du har löst klart.
+2. Skriv klart din redovisningstext i `report/kmom01.md`.
+3. Committa, tagga och pusha:
 
-Kika igenom följande artiklar.
-
-1. Kika igenom referensmanualen för MariaDB, kort och översiktligt så att du kan navigera i den. Referensmanualen är ett viktigt verktyg för att bli bra på databaser och SQL. Se till att du kan hitta till den delen som visar hur SQL med SELECT skall skrivas i MySQL.
-
-    * [MariaDB Server Documentation](https://mariadb.com/docs/)
-    * [MySQL documentation](https://dev.mysql.com/doc/) (om du har tid och lust)
-
-1. Under kursen kommer vi att ponera vikten av att hålla sig till en kodstil för SQL-koden. Det kommer inte vara absolut strikt, men det är en rimlig rekommendation att följa en kodstil. För kursen har vi valt "[SQL Style Guide by Simon Holywell](https://www.sqlstyle.guide/)". Ha detta i bakhuvudet när du funderar på hur man skriver sin SQL-kod. Om du har funderingar kring kodstilen så kan du läsa "[SQL style guide misconceptions](https://www.simonholywell.com/post/2016/12/sql-style-guide-misconceptions/)".
-
-
-
-### Video 
-
-Om du gillar att lära från video så kan du kika igenom följande videor för att få grepp om grunderna i Databaser och SQL. Ibland kan man hitta bra resurser på nätet och detta är ett litet försök att visa upp det.
-
-1. För att få en snabb översikt om databaser och SQL så kikar du igenom videon "[What is Database & SQL? (6 min)](https://www.youtube.com/watch?v=FR4QIeZaPeM)". Videon ger dig en snabb översikt av termer med förklaringar.
-
-1. Videon "[Learn Basic SQL in 10 Minutes (9 min)](https://www.youtube.com/watch?v=bEtnYWuo2Bw)" ger dig en snabb förklaring till grunderna i SQL. Videon hanterar även översikt av mer avancerade begrepp som JOIN, UNION och GROUP. Dessa kommer senare i kursen.
-
-
-
-### Ai som lärare (instuderingsfrågor)
-
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand via din Ai-kompis, för att på egen hand träna på de koncept som är relevanta för detta kmom.
-
-<details>
-<summary>Instuderingsfrågor</summary>
-
-1. Jag skall gå en kurs i databasteknik på högskolan, vill du förklara grunden i en relationsdatabas?
-1. Berätta kort om databasen MariaDB och hur den skiljer sig från MySQL.
-1. Förklara kort hur SQL fungerar och vilka de vanligaste kommandona är.
-
-Här är en [summering av hur en sådan dialog kan se ut](https://chatgpt.com/share/696133c6-e268-8005-9383-5a185ca1d533), därefter är det bara att fylla på med egna funderingar.
-
-</details>
-
-Glöm inte att vara kritisk till informationen du får, precis som man vanligen är mot alla olika källor av information. Svaren kan skifta beroende av vilken Ai-kompis du väljer.
-
-
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom övningen [Övning databasen World: SELECT och rapporter](/website/laromaterial/ovning/world-database-with-select/). Övningen går igenom hur du kan använda en befintlig databas (world) och skapa SQL-frågor mot den med både terminalklienten och desktopklienten.
-
-
-
-### Uppgifter
-
-Dessa uppgifter skall utföras och redovisas.
-
-1. Genomför uppgiften "[Databasen World](/website/laromaterial/uppgift/kmom01-databasen-world/)".
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Hur känns det att komma igång med databaser, klienter och SQL - är det något du ser fram emot eller fasar inför?
-* Har du jobbat med databaser eller liknande tekniker tidigare?
-* Hur gick det att komma igång med labbmiljön för MariaDB och klienterna? Flöt det på eller strulade någon del?
-* Hur gick det att genomföra övning/uppgift med databasen world? Lyckades du med den sista utmaningen?
-* Vilken är din TIL för detta kmom?
-
-TIL är en akronym för "Today I Learned" vilket leksamt anspelar på att det finns alltid nya saker att lära sig, varje dag. Man brukar lyfta upp saker man lärt sig och där man kanske hajade till lite extra över dess nyttighet eller enkelhet, eller så var det bara en ny lärdom för dagen som man vill notera.
+```bash
+git add report/kmom01.md
+git commit -m "Add kmom01 report"
+git tag kmom01
+git push origin main --tags
+```
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Starta från en kurs-template och sätt upp kursens standarddevmiljö med Docker Compose. Lärdomarna handlar om TypeScript och verktygskedjan — ingenting i arkitekturen ska vara nytt den här veckan.
 
+Studenten startar inte från noll och inte heller från sin kod i node-kursen. Kursen tillhandahåller en template med `index.ts`, `app.ts` och grundläggande projektstruktur — tillräckligt för att komma igång direkt utan att det är förifyllt.
 
-### Måndag
+Templaten inkluderar **färdig auth-kod** (login, logout, skyddade routes, JWT i httpOnly-cookies, bcrypt) strukturerad i lagerarkitekturen. Auth är förkunskap från node-kursen och är inte ett lärandemål i den här kursen — den finns i templaten som referensimplementation och för att kmom03:s säkerhetsmoment ska fungera från start.
 
-Första timmen:
+Docker Compose är kursens standarddevmiljö från vecka 1 och framåt — inte ett läromoment i sig. Målet med issue 01-40 är att devmiljön är på plats och fungerar; alla efterföljande kmom förutsätter att studenten jobbar i Docker Compose. Det eliminerar "fungerar på min maskin"-problem och gör MongoDB-hanteringen trivial från och med kmom02.
 
-* Berätta om kursens upplägg, examination, inlämningar, betygsättning.
-* Berätta om kmom och vad som skall göras i kmom01.
-* Visa hur ett kursrepo ser ut för en student och hur man jobbar med det.
-* Visa hur det ser ut när man publicerar på GH Pages
-* Berätta om labbmiljön och vad som skall installeras.
-* Visa min egen labbmiljö och dubbelkolla att my.cnf fungerar.
+### Pedagogisk notering
 
-Andra timmen:
+Introducera **inte** lagerarkitektur (controller/service/repository) den här veckan. Logiken ska samlas i routes och börja kännas plottrigt — det upplevda behovet gör att kmom02 känns motiverat snarare än som ceremoni.
 
-* Jobba igenom delar av övningen med databasen World.
+SonarQube-rapporten i slutet av kmom01 förstärker det här: studenten ser *i siffror* att koden har problem. Det är ett starkare argument för refaktorering än vad läraren kan säga i en föreläsning.
 
+SonarQube ingår förkonfigurerat i kursens docker-compose men startar inte automatiskt. Studenten kör det när de vill ha feedback: `npm run sonar`. I kmom02 tillkommer SonarLint i editorn för löpande feedback, och i kmom04 formaliseras kedjan med en sonar-scanner pre-push hook och ESLint + coverage i CI.
 
+### Issue 01-35 — client-exploration
 
-### Onsdag
+Direkt efter att `express.static()` är på plats och frontenden är synlig för första gången studeras klientkoden. Målet är inte att studenten ska förstå Svelte — utan att förstå det kontrakt deras backend behöver uppfylla.
 
-Första timmen:
+**Vad studenten gör:**
+1. Titta på `client/src/lib/state/apidoc.svelte.ts` — förstå `UNLOCK`-mappningen som kopplar SvelteKit-routes till backend-endpoints
+2. Titta på `client/src/routes/portfolio/+page.svelte` — vad hämtar den och vad förväntar den sig i svaret?
+3. Starta Svelte-devservern mot din körande backend: `cd client && npm run dev`
+4. Navigera till `http://localhost:5173` — se vilka sektioner som är låsta och varför
 
-* Kort om relationsdatabaser
-* Kort om MariaDB
-* Introduktion till ER-modellering
-* Använd ER-modellering för att förklara begreppen
-    * Tabeller
-    * Kolumner
-    * Datatyper i SQL
-* Öva på ER-modellering
+### `/api/doc` som upplåsningsmekanism
 
-Andra timmen:
+Frontenden probar `GET /api/doc` vid uppstart och aktiverar UI-sektioner baserat på deklarerade endpoints. Minimalt svar vid start:
 
-* Förenklad ER-modell av databasen world för att komma igång med tankar kring ER-modelleringen
+```typescript
+app.get('/api/doc', (req, res) => {
+  res.json({
+    name: 'börsklient-api',
+    version: '1.0.0',
+    endpoints: [
+      { method: 'GET', path: '/health' },
+      { method: 'GET', path: '/api/doc' },
+      { method: 'GET', path: '/api/portfolio' },
+    ]
+  })
+})
+```
 
+Studenten utökar `/api/doc` i varje kmom när nya routes läggs till. Det är ett enkelt mönster som skapar vanan att dokumentera API:et löpande.
 
+### Zod env-mönster
 
-### Torsdag
+```typescript
+import { z } from 'zod'
 
-* Labbmiljön på plats
-* Övningen med databasen World klar
-* Uppgiften med databasen world påbörjad
+const envSchema = z.object({
+  PORT: z.string().default('3000'),
+  MONGODB_URI: z.string(),
+  JWT_SECRET: z.string().min(32),
+})
+
+export const env = envSchema.parse(process.env)
+```
+
+Studenten har aldrig sett Zod förut. Fokus i issue 01-70 är att förstå att ett schema beskriver förväntad form, och att `parse()` kastar ett tydligt fel vid uppstart om något saknas. I kmom02 används Zod igen för att validera inkommande request-data i controllers — det är ett annat användningsfall (opålitlig användardata istället för känd konfiguration) och bygger naturligt på denna grund.
+
+### Kursens applikationsdomän
+
+Kursen bygger en **börsklientapp** (portfölj + handelshistorik mot tokenbörsen) från dag ett. Appen växer organiskt kmom för kmom:
+
+| Kmom | Vad som tillkommer i appen |
+|---|---|
+| 01 | Hälsostatus, API-dokumentation, tom portfolioöversikt |
+| 02 | Samma vy, men kod refaktorerad — stabilitet är målet |
+| 03 | Profilsida med lösenordsbyte, säkerhetsshärdning |
+| 04 | Ingen ny vy — testning och kvalitet |
+| 05 | Marknadsvy, orderformulär, handelshistorik, SSE-flöde |
+| 06 | Prisnotifieringar, portföljanalys |
+
+### Öppna frågor
+
+- Vad exakt ingår i template-repot? Minsta möjliga (index.ts + app.ts + tsconfig + package.json + auth) ger mest lärande; mer kan ge smidigare start men minskar vad studenten faktiskt gör i issue 01-10 – 01-30.
 
 </details>
-
