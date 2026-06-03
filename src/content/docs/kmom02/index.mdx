@@ -1,167 +1,178 @@
 ---
-title: "Kmom02: SQL JOIN"
-description: Mer SQL med fokus på JOIN och aggregerande funktioner och vi fortsätter med grunder i ER-modellering.
+title: 'kmom02: Lagerarkitektur'
+description: Refaktorera från logik-i-routes till controllers, services och repositories.
 revision:
-  2026-01-23: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-*
-*/}
+Den här veckan refaktorerar du koden från kmom01. Logiken som samlades i routes bryts upp i tre separata lager — controllers, services och repositories — och du lägger till strukturerad felhantering, Zod-validering av inkommande data och publika IDs. Veckan avslutas med att du mäter resultatet i SonarQube och jämför med baslinjemätningen från kmom01.
 
-Vi jobbar vidare med SQL och tränar på att göra JOIN av flera tabeller och skriva rapporter som aggregerar värden i tabellen. Vi tittar också på begreppet vyer.
+Det här är arkitekturen du bygger. En HTTP-request rör sig nedåt genom lagren — varje lager har ett enda ansvar och vet ingenting om lagren ovanför.
 
-Vi börjar titta på hur man modellerar databaser med ER-diagram.
+```
+HTTP Request
+    ↓
+Router          (definierar URL-mönster och middleware)
+    ↓
+Controller      (läser req, skriver res)
+    ↓
+Service         (affärslogik — inga Express-typer)
+    ↓
+Repository      (all databaskod — inga Express-typer)
+    ↓
+MongoDB
+    ↓
+HTTP Response
+```
 
+Issues 02-10 till 02-30 bygger de tre mittlagerna ett i taget. Issues 02-40 till 02-60 förfinar arkitekturen.
 
+## Issues
 
-## Läs & Studera
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 02-10 | `controllers` | Flytta route-logik till controllers — routes pekar bara på controller-funktioner |
+| 02-20 | `services` | Flytta affärslogik till services — controllers anropar services |
+| 02-30 | `repositories` | Flytta all Mongoose-kod till repositories — services anropar repositories |
+| 02-40 | `error-handling` | Custom error-klasser (`AppError`, `ValidationError`, `NotFoundError`), global error handler, 404 fallback |
+| 02-50 | `zod-request` | Zod-scheman i controllers för att validera inkommande request-data, typsäkra DTOs |
+| 02-60 | `public-id` | Generera publikt ID med `nanoid` i repository-lagret — använd det i URL:er istället för MongoDB `_id` |
+| 02-70 | `sonar` | Kör SonarQube igen och jämför rapporten med baslinjemätningen från kmom01 |
 
+## Föreläsningar
 
-### Föreläsning
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med lagerarkitektur-föreläsningen — den ger helhetsbilden som gör att de övriga fallen känns naturliga.
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+| Titel | Om |
+|---|---|
+| MVC och lagerarkitektur — varför mönstret finns | Problemet med logik-i-routes, separation of concerns |
+| Controllers, services och repositories i TypeScript | Konkret refaktorering steg för steg |
+| Felhantering som arkitekturell princip | Custom error-klasser, Express fyra-argument-middleware, middleware-ordning |
+| Zod för request-validering | `safeParse` i controllers, felformat mot klienten, `z.infer<>` för typsäkra DTOs |
+| Publika IDs med nanoid | Varför MongoDB `_id` inte ska exponeras i URL:er, mönstret för att hålla isär intern och extern identifierare |
 
-1. [SQL introduktion och exempel](/website/laromaterial/forelasning/sql-introduktion-och-exempel/) ger dig en introduktion till frågespråket SQL.
+## Studiematerial
 
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 02-10 | [Presentation Domain Data Layering — Martin Fowler](https://martinfowler.com/bliki/PresentationDomainDataLayering.html) | Förklarar problemet som lagerarkitektur löser och varför separationen är värd kostnaden — ger ett språk för det du bygger |
+| Issue 02-30 | [Mongoose — Schemas](https://mongoosejs.com/docs/guide.html) | Förklarar scheman, sub-dokument och `lean()` — de delar av Mongoose du använder när du skapar Portfolio-modellen |
+| Issue 02-40 | [Express — Error handling](https://expressjs.com/en/guide/error-handling.html) | Förklarar hur fyra-argument-middleware fungerar och varför ordningen i middleware-kedjan spelar roll |
+| Issue 02-50 | [Zod — Parsing](https://zod.dev/?id=safeparse) | `safeParse` vs `parse` — viktigt skifte när input kommer från opålitliga källor |
 
-### Kurslitteratur
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
-Läs följande:
+| Verktyg | Länk |
+|---|---|
+| Zod dokumentation | [zod.dev](https://zod.dev) |
+| nanoid | [npmjs.com/package/nanoid](https://www.npmjs.com/package/nanoid) |
+| Express 5.x API | [expressjs.com/en/5x/api.html](https://expressjs.com/en/5x/api.html) |
+| Mongoose API | [mongoosejs.com/docs/api](https://mongoosejs.com/docs/api/model.html) |
 
-1. Kursboken Databasteknik om mer SQL.
-    * Kap 8: Mer om SQL: Aggregatfunktioner, null-värden, yttre join (hoppa över  delen om yttre join)
+## Quiz
 
-Det finns ytterligare ett kapitel i boken som är relaterat till bakgrunden av SQL, det går utanför kursens ram så läs endast vid intresse.
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-1. Kursboken Databasteknik om databasteknikens grunder.
-    * Kap 11: Relationsalgebra
+Quizen för kmom02 testar om du förstår ansvaret för varje lager i lagerarkitekturen, vad en global error handler gör, varför `safeParse` används i controllers, vad `z.infer<>` är, och vad skillnaden är på intern och extern identifierare.
 
+## Redovisningstext
 
-{/*
-### Artiklar
+Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
-Kika igenom följande artiklar.
+1. Beskriv skillnaden mellan controller, service och repository med ett konkret exempel från din kod. Vad ansvarar varje lager för?
 
-1. XXX
-*/}
+2. Hur fungerar din globala error handler? Vad händer med ett fel som kastas i ett repository?
 
+3. Varför valideras inkommande data i controller-lagret och inte i service-lagret?
 
+4. Du använde Zod i kmom01 för att validera miljövariabler. Vad är skillnaden mot att använda Zod för att validera en request body i en controller?
 
-### Ai som lärare (instuderingsfrågor)
+5. Jämför din SonarQube-rapport från kmom01 med rapporten efter kmom02. Vad förändrades och varför?
 
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand för att träna på de koncept som är relevanta för detta kmom.
+6. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
-<details>
-<summary>Instuderingsfrågor</summary>
+## Inlämning
 
-1. Berätta kort om konceptet JOIN i relationsdatabaser och SELECT.
-1. Vad innebär en CROSS JOIN?
-1. Vad innebär en INNER JOIN?
-1. Vilken typ av aggregerande funktioner finns i SQL, visa några exempel.
-1. Förklara skillnaden mellan WHERE och HAVING.
-1. Förklara begreppet VYER i SQL och när kan det vara användbart?
+1. Stäng de GitHub-issues som du har löst klart.
+2. Skriv klart din redovisningstext i `report/kmom02.md`.
+3. Committa, tagga och pusha:
 
-Här är en [utskrift av när en frågesession genomförts](https://chatgpt.com/share/69738697-53dc-8005-b142-c8aaae2cecc1). Dina svar kan skifta från de som visas. Var alltid kritisk till dina källor.
-
-</details>
-
-
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom övningen "[Övning databasen World: JOIN och rapporter](/website/laromaterial/ovning/world-database-join/)". Övningen jobbar vidare med databasen world och går igenom hur man slår ihop flera tabeller till en rapport med JOIN.
-
-1. Jobba igenom övningen "[Övning databasen World: Aggregerande funktioner och vyer](/website/laromaterial/ovning/world-database-aggregation/)". Övningen jobbar vidare med databasen world och går igenom nya koncept som aggregerande funktioner och vyer.
-
-{/*
-1. Verktyg för att modellera?
-
-*/}
-
-
-
-### Uppgifter
-
-Följande uppgifter skall utföras och resultatet skall redovisas.
-
-1. Genomför uppgiften "[Databasen World: JOIN](/website/laromaterial/uppgift/kmom02-join/)".
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Jämför SQL med andra sätt att programmera, relatera till några av de programmeringsspråk du kan.
-* Förklara för någon som inte kan databaser, vad JOIN gör och hur det fungerar.
-* Hur gick det att genomföra övningar och uppgifterna, berätta gärna vad som var enkelt och vad som var mer utmanande att hantera?
-
-* Vilken är din TIL för detta kmom?
+```bash
+git add report/kmom02.md
+git commit -m "Add kmom02 report"
+git tag kmom02
+git push origin main --tags
+```
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Kursens kärna. Refaktorera från logik-i-routes till ett rent lagersystem. Det pedagogiska momentet är att studenten *redan har sett problemet* (routes som svämmar över från kmom01) innan lösningen presenteras.
 
+Arkitekturen som introduceras:
 
-### Måndag
+```
+HTTP request
+   ↓
+Router (route-definition only)
+   ↓
+Controller (req/res, validering med Zod)
+   ↓
+Service (affärslogik, vet ingenting om req/res)
+   ↓
+Repository (all databas-kod, vet ingenting om Express)
+   ↓
+Response (DTO)
+```
 
-Första timmen:
+### Vad frontenden låser upp
 
-* Repetera SELECT mot databasen world.
-* Prata om JOIN. Bygg ihop en trippel JOIN av databasen World.
-* Gör en vy och prata om konceptet vyer.
+Ingenting nytt — och det är poängen. Portfolioöversikten och auth-formulären som fungerade i kmom01 ska fortsätta fungera efter refaktoreringen. Frontenden är det implicita regressionstestet: om den slutar fungera bröt studenten något i refaktoreringen.
 
-Andra timmen:
+### Pedagogisk notering
 
-* Träna på aggregerande funktioner med databasen World.
-* SUM, AVG, COUNT, MIN, MAX
-* GROUP_CONCAT
-* Prata om GROUP BY och HAVING.
+Auth-koden i templaten är kursens referensimplementation av lagerarkitekturen. Innan studenten börjar refaktorera sin egen kod bör läraren gå igenom auth-koden i föreläsning och visa hur `auth.controller.ts`, `auth.service.ts` och `user.repository.ts` hänger ihop. Studenten har då ett konkret, fungerande exempel att jämföra med — inte bara ett abstrakt diagram.
 
+Refaktoreringen i kmom02 är därmed inte en övning i att uppfinna mönstret, utan i att applicera ett mönster studenten redan sett i praktiken.
 
+Läraren bör i föreläsningen visa refaktoreringen som en levande process: börja med en route full av logik och bryt upp den steg för steg live. Det är svårt att förmedla *varför* i text.
 
-### Onsdag (preliminär, ej klar)
+### SonarQube — andra mätpunkten
 
-Första timmen:
+När refaktoreringen är klar kör studenten `npm run sonar` igen och jämför rapporten med baslinjemätningen från kmom01. Förbättringen i siffror (komplexitet, duplicering, code smells) är det konkreta beviset på att lagerarkitektur inte bara är teori.
 
-* ER-modellering med relationer
-* Verktyg för modellering: 
-    * dbdiagram.io
-    * draw.io
-    * PlantUML
+SonarLint i editorn introduceras i kmom04 när hela kvalitetskedjan formaliseras — SonarLint ger löpande feedback, `npm run sonar` ger djupare analys on-demand, och pre-push hook blockerar push om quality gate inte passerar. Att dela upp kedjan med SonarLint i kmom02 och resten i kmom04 splittrar storyn i onödan.
 
-Andra timmen:
+### Publikt ID med nanoid
 
-* ER-modellering, övning med WoW
+Routes i node-kursen använde MongoDB `_id` direkt i URL:er. Det läcker implementationsdetaljer och gör IDs instabila vid schema-migrationer. Nu när repository-lagret finns är det rätt plats att lösa det:
 
-### Torsdag
+```typescript
+import { nanoid } from 'nanoid'
 
-* Övning "join" med databasen World klar
-* Övning "aggregate" med databasen World klar
-* Veckans uppgift med databasen world påbörjad
+// I repository, vid create:
+const publicId = nanoid()   // → "V1StGXR8_Z5jdHi6B-myT"
+```
+
+Mongoose-dokumentet får ett extra fält `publicId`. Routes och controllers exponerar bara `publicId` — aldrig `_id`.
+
+### Öppna frågor
+
+- Ska DTOs vara egna klasser/typer eller räcker det med Zod-inferens (`z.infer<typeof schema>`)?
 
 </details>
