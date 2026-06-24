@@ -29,7 +29,8 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 01-10 | `getting-started` | Klona template-repot, förstå strukturen, starta MongoDB med `docker compose up -d mongodb`, kör första SonarQube-scan med `npm run sonar` |
+| 01-10 | `getting-started` | Klona template-repot, förstå strukturen, starta MongoDB med `docker compose up -d mongodb` och kör `npm run dev` |
+| 01-15 | `quality` | Kör hela kvalitetskedjan — TypeScript, ESLint, Prettier, Vitest, SonarQube — förstå vad varje verktyg kontrollerar och etablera baseline-scan |
 | 01-20 | `typescript` | Läs och förstå tsconfig-konfigurationen och TypeScript-typerna som redan finns i koden, bygg och kör |
 | 01-30 | `express` | Utöka Express-servern i TypeScript, konfigurera `express.static()` och SPA-fallback för Svelte-appen |
 | 01-35 | `client-exploration` | Registrera ett konto, logga in och utforska frontenden — se vilka sektioner som är låsta och varför |
@@ -37,6 +38,11 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 | 01-50 | `rest` | Bygg de första domänspecifika REST-routes med TypeScript-typer, korrekta statuskoder |
 | 01-60 | `api-doc` | `GET /api/doc` — självbeskrivande endpoint som listar tillgängliga routes; frontenden använder den för att aktivera UI-sektioner |
 | 01-70 | `zod-env` | Validera miljövariabler med Zod vid uppstart — appen ska krascha med ett tydligt felmeddelande om något saknas |
+
+Valfria issues — gör dem om du vill utforska vidare:
+
+| Issue | Namn | Vad du gör |
+|---|---|---|
 | 01-75 | `strict` | Aktivera strict mode i TypeScript — industristandardinställningen för nya projekt |
 
 ## Föreläsningar
@@ -98,7 +104,15 @@ Skriv din redovisningstext i `report/kmom01.md` i ditt repo. Frågorna nedan är
 
 1. Stäng de GitHub-issues som du har löst klart.
 2. Skriv klart din redovisningstext i `report/kmom01.md`.
-3. Committa, tagga och pusha:
+3. Verifiera att koden är ren innan du taggar:
+
+```bash
+npm run check
+```
+
+Alla kontroller ska passera — typecheck, lint, format och tester. Åtgärda eventuella fel innan du går vidare.
+
+4. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom01.md
@@ -130,7 +144,7 @@ Introducera **inte** lagerarkitektur (controller/service/repository) den här ve
 
 SonarQube-rapporten i slutet av kmom01 förstärker det här: studenten ser *i siffror* att koden har problem. Det är ett starkare argument för refaktorering än vad läraren kan säga i en föreläsning.
 
-SonarQube ingår förkonfigurerat i kursens docker-compose men startar inte automatiskt. Studenten kör det när de vill ha feedback: `npm run sonar`. I kmom02 tillkommer SonarLint i editorn för löpande feedback, och i kmom04 formaliseras kedjan med en sonar-scanner pre-push hook och ESLint + coverage i CI.
+SonarQube ingår förkonfigurerat i kursens docker-compose men startar inte automatiskt. Studenten kör det när de vill ha feedback: `npm run sonar`. I kmom02 kör studenten om skanningen och jämför mot baslinjen. I kmom04 formaliseras hela kedjan: SonarLint i editorn, sonar-scanner pre-push hook och ESLint + coverage i CI.
 
 ### Issue 01-35 — client-exploration
 

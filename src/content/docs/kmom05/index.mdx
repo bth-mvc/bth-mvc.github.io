@@ -1,185 +1,200 @@
 ---
-title: "Kmom05: ER logisk + Procedurer"
-description: Fortsätt mer ER-modellering och börja använda lagrade procedurer.
+title: 'kmom05: Tokenbörsen — anslut och handla'
+description: Koppla din server mot den gemensamma tokenbörsen och ta emot webhooks och SSE.
 revision:
-  2026-01-01: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-* inbyggda integritetsregler?
-* Kan tid flyttas till ett kmom tidigare?
-* OUTER JOIN
+Den här veckan kopplar du din server som *klient* mot den gemensamma tokenbörsen — ett levande system där alla studenter på kursen är aktiva deltagare. Det är ett medvetet skifte: du implementerar inte längre vad läraren specificerar — du integrerar med ett system du inte kontrollerar. Tekniken är känd (REST, webhooks, SSE) men kontexten är ny och motivationen omedelbar: dina ordrar påverkar priser som alla andra studenter ser i realtid.
 
-TILL KOMMANDE KMOM:
+## Issues
 
-* Serietabeller med tävling, utöka banken
-* Användare inloggning, koppling avatar till user, utöka banken
-* Skapa användare, tidsstämplar
-* (Order, lagerhantering, fakturering)
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i integrationen.
 
-*/}
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
-Vi fortsätter med ER-modellen och översätter den konceptuella modellen till en logisk modell som är anpassad för relationsdatabaser.
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 05-10 | `api-key` | Konfigurera API-nyckel och börsens bas-URL i `.env`, verifiera med ett första anrop |
+| 05-20 | `mock-server` | Kör lokal mock-server för utveckling, koppla om till live-börsen med miljövariabel |
+| 05-30 | `market-data` | Hämta tokens och orderbok från börsen, visa i Svelte-frontenden |
+| 05-40 | `place-orders` | Implementera köp/säljorder, hantera felfall (otillräckliga medel, okänd token) |
+| 05-50 | `webhooks` | Ta emot och HMAC-verifiera webhooks (mock-server lokalt, polling-fallback mot live-börsen) |
+| 05-60 | `sse-feed` | Prenumerera på börsens SSE-flöde, relay:a realtidspriser och händelser till Svelte via egen SSE |
 
-Vi tittar på hur man kan programmera i en databas med lagrade procedurer. Dessa konstruktioner ger oss ökade möjligheter att formulera vår SQL-kod i mer avancerade programmeringskonstruktioner.
+Valfria issues — gör dem om du vill utforska vidare:
 
-Lagrade procedurer ger oss möjligheten till inkapsling av SQL-koden och att vi kan publicera ett API som är tillgängligt till de klienter som vill åt databasen. Detta gör att databaskoden och dess interna representation kan skyddas från klienterna i C# som enbart jobbar mot databasen via ett API bestående av lagrade procedurer.
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 05-65 | `trade-history` | Hämta och visa paginerad handelshistorik med cursor-pagination |
+| 05-70 | `socket-client` | Koppla som Socket.io-klient mot börsens handelsgolv-chatt |
 
+## Föreläsningar
 
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med börsserverns API-föreläsning — den ger helheten du behöver för att förstå hur delarna passar ihop.
 
+| Titel | Om |
+|---|---|
+| Tokenbörsen — konceptet och API:et | Börsserverns design, matchningsmotorn, tokentyper, gamification |
+| Att konsumera REST-API:er — patterns och fallgropar | Headers, felhantering, timeouts |
+| Webhooks — ta emot och verifiera | HMAC-signaturer, idempotens, retry från avsändarens sida |
+| SSE som relay — prenumerera och vidarebefordra | Börsflöde → studentserver → frontend |
+| Lokal mock-server — varför och hur | Utveckla mot mock, byta till live med miljövariabel |
 
-## Läs & Studera
+## Studiematerial
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 05-40 | [GitHub Docs — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) | Förklarar HMAC-signaturverifiering i praktiken — samma mönster som börsen använder |
+| Issue 05-50 | [MDN — Server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) | SSE-formatet, EventSource och reconnect-beteende |
 
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
-### Föreläsning
+| Verktyg | Länk |
+|---|---|
+| Börsserverns API-dokumentation | Se Swagger-länk i repots README |
+| MDN — EventSource | [MDN — EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) |
+| MDN — Using SSE | [MDN — Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) |
+| Node.js crypto (HMAC) | [nodejs.org/api/crypto.html](https://nodejs.org/api/crypto.html) |
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+## Quiz
 
-1. [Tidstämplar i databastabell](/website/laromaterial/forelasning/tidsstamplar) visar hur tidstämplar kan fungera i en databastabell och hur de kan få sitt värde per automatik.
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-1. [Lagrade procedurer och programmera i databasen](/website/laromaterial/forelasning/lagrade-procedurer) introducerar framförallt hur man jobbar med lagrade procedurer i databasen för att kombinera variabel, SQL och mer sedvanliga programmeringskonstruktioner.
+Quizen för kmom05 testar om du förstår hur API-nyckelautentisering fungerar, vad HMAC-signaturverifiering gör och varför den är obligatorisk, hur SSE-kedjan från börsen till frontenden fungerar, vad cursor-pagination är, och skillnaden på att bygga ett API och att konsumera ett.
 
-1. [Databasmodellering - Översätt till relationsmodellen](/website/laromaterial/forelasning/er-modellering-logisk-modellering/) ger en översikt till hur du kan översätta en ER-modell från den konceptuella fasen till en databasmodell som matchar relationsmodellen i den logisk modelleringsfasen.
+## Redovisningstext
 
+Skriv din redovisningstext i `report/kmom05.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
+1. Hur autentiserar du dina anrop mot börsen? Var i koden lagras API-nyckeln och varför?
 
-### Kurslitteratur
+2. Beskriv SSE-kedjan i din implementation. Vad händer när börsen skickar ett nytt pris?
 
-Läs följande:
+3. Förklara hur webhook-signaturverifiering fungerar. Vad hade hänt om du hoppat över den?
 
-1. Databasteknik
-    * Kap 13. Integritetsvillkor
-    * Kap 15: Lagrade procedurer
-    * Kap 20: Tid i databaser
+4. Vad är skillnaden på att bygga ett API (kmom01–04) och att konsumera ett API? Vad var oväntat?
 
-1. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
-    * [Integritetsvillkor](http://www.databasteknik.se/webbkursen/integritet/index.html)
+5. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
+## Inlämning
 
-__ER-modellering__
+1. Kör `npm run sonar` och jämför med din kmom04-scan. Notera förändringar i din redovisningstext.
+2. Stäng de GitHub-issues som du har löst klart.
+3. Skriv klart din redovisningstext i `report/kmom05.md`.
+4. Committa, tagga och pusha:
 
-1. Databasteknik
-    * Kap 6: Översättning från ER-modellen till relationsmodellen
-
-1. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
-    * [Översättning från ER-modellen till relationsmodellen](http://www.databasteknik.se/webbkursen/er2relationer/index.html)
-
-
-
-### Artiklar
-
-Kika igenom följande artiklar.
-
-1. I manualen för MariaDB kan du läsa om lagrade procedurer (stored procedures), det är främst följande kapitel som är relevanta, bekanta dig med dem, du kommer att träna på begreppen i kommande övningar.
-    * [Stored Procedures](https://mariadb.com/kb/en/stored-procedures/)
-    * [Stored Procedure Overview](https://mariadb.com/kb/en/stored-procedure-overview/)
-    * [TIMESTAMP](https://mariadb.com/kb/en/timestamp/)
-
-1. Fortsätt jobba igenom artikeln "[Kokbok för databasmodellering](https://dbwebb.se/kunskap/kokbok-for-databasmodellering)", den ger dig processen du skall följa. I detta kmom handlar det främst om att fokusera på logisk modellering.
-
-
-
-{/*
-### Ai som lärare (instuderingsfrågor)
-
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand för att träna på de koncept som är relevanta för detta kmom.
-
-<details>
-<summary>Instuderingsfrågor</summary>
-
-1. 
-
-Här är en [utskrift av när en frågesession genomförts](https://chatgpt.com/share/68bafa23-4b84-8005-a745-451d43258c9a). Dina svar kan skifta från de som visas. Var alltid kritisk till dina källor.
-
-</details>
-
-*/}
-
-
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom "[Lagrade procedurer i databas](/website/laromaterial/ovning/lagrade-procedurer/)" för att lära dig om lagrade procedurer och vad du kan göra med dem.
-
-1. Jobba igenom övningen "[Övning: CSharp med lagrade procedurer](/website/laromaterial/ovning/csharp-stored-procedure/)" för att lära dig hur du använder lagrade procedurer mot databasen från ett CSharp program.
-
-
-
-### Uppgifter
-
-Följande uppgifter skall utföras och resultatet skall redovisas.
-
-1. Jobba igenom uppgiften "[Uppgift: CSharp bank (kmom05)](/website/laromaterial/uppgift/kmom05-csharp/)" där du får jobba med lagrade procedurer.
-
-1. Jobba igenom uppgiften "[Uppgift: ER-modellering - logisk (kmom05)](/website/laromaterial/uppgift/kmom05-er-logisk/)".
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Hur gick det att komma igång med lagrade procedurer?
-* Hur är din syn på att "programmera" på detta viset i databasen, jämför med traditionell SQL som exponeras i klienten?
-* Skriv ett kort stycke (2-5 meningar) om lagrade procedurer där du förklarar begreppen (fördel, nackdel, användningsområde) för en som inte är insatt.
-
-* Hur går det med logisk modellering, kan du se att databasen växer fram? Vad är svårt att förstå och greppa med själva modelleringen, berätta om utmaningarna med modelleringen.
-
-* Vilken är din TIL för detta kmom?
+```bash
+git add report/kmom05.md
+git commit -m "Add kmom05 report"
+git tag kmom05
+git push origin main --tags
+```
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Studenten är inte längre ensam i sin sandbox. Deras ordrar påverkar priser som alla andra studenter ser i realtid. Tekniken är känd — REST, webhooks, SSE — men kontexten är ny och motivationen omedelbar.
 
+### Tokenbörsen — konceptet
 
-### Måndag
+Alla studenter delar en gemensam börsserver med ett fast antal förskapade tokens:
 
-Första timmen:
+- Vid **första autentiserade anropet** skapas en plånbok automatiskt med startbalans och initial tokenfördelning
+- En **matchningsmotor** parar ihop ordrar automatiskt: lägsta säljpris möter högsta köppris
+- Alla affärer är publika — **marknadsflödet** visar i realtid vad som händer
 
-* Övning med lagrade procedurer, dels i SQL och dels i CSharp.
+Tokentyper:
 
-Andra timmen:
+| Typ | Exempel | Beteende |
+|---|---|---|
+| **Stabil** | FIKA, KAFFE | Låg volatilitet, säker hamn |
+| **Volatil** | DBW, NODE | Stora prissvängningar, hög risk/reward |
+| **Yield** | HODL | Betalar automatisk utdelning till alla innehavare varje timme |
 
-* Uppgift där man bygger terminalprogram som använder lagrade procedurer. Modellera själva databasen, skapa den med SQL och visa hur man använder den via lagrade procedurer.
+### Börsserverns API (skiss)
 
+```
+GET  /assets                 — lista alla tokens + typ + aktuellt pris
+GET  /assets/:id/orderbook   — aktiva köp/säljordrar för en token
+POST /orders                 — lägg ny order (köp/sälj)
+GET  /trades                 — genomförda affärer (paginerat, cursor)
+GET  /portfolio              — inloggad students innehav + yield-historik
+GET  /leaderboard            — portfoliovärde rankad för alla studenter
+SSE  /market/feed            — priser, affärer, marknadshändelser, yield-utbetalningar
+```
 
+### Förutsättning
 
-### Onsdag
+Börsen måste vara driftsatt *innan* kursen startar. Den ska:
+- Kräva API-nyckel (en per student)
+- Ha rate limiting med tydliga headers (`X-RateLimit-Remaining`, `Retry-After`)
+- Ha Swagger/OpenAPI-dokumentation
+- Exponera paginerade endpoints med cursor
+- Skicka HMAC-signerade webhooks vid ordermatchning
+- Streama marknadsflödet via SSE
 
-Första timmen:
+En lokal mock-server tillhandahålls för att studenter ska kunna testa utan att påverka den gemensamma marknaden under utveckling.
 
-* ER-modellering, fokus logisk med ett exempel 
+### SSE-kedjan
 
+```
+Börsservern  →  SSE-flöde  →  Studentens server  →  SSE  →  Svelte-frontend
+```
 
-Andra timmen:
+Studentens server är en *relay* — den prenumererar på börsens flöde och vidarebefordrar relevanta händelser till sin frontend. Det är ett vanligt mönster för att filtrera och aggregera realtidsdata.
 
-* Stöd för uppgiften med ER-modellering (logisk)
+### Webhook-leverans — beslutad strategi (2026-06-22)
 
+Webhooks kräver att studentens server är nåbar. Tre alternativ utvärderades:
 
-### Torsdag
+1. **ngrok/tunnel** — fungerar men lägger till ett externt verktyg och signup
+2. **Polling-endpoint** — börsen sparar payloads, studenten pollar `GET /webhooks/pending`
+3. **Mock-server lokalt** — mock-servern skickar webhooks direkt till `localhost:3000`
 
-* 
+**Beslut: kombination av 1 (mock lokalt) och 2 (polling live).**
+
+- **Under utveckling:** mock-servern (05-20) kör lokalt och skickar webhooks till `localhost:3000`. Ingen tunnel behövs. Studenten implementerar HMAC-verifiering och webhook-hantering — fullt lärandemål.
+- **Mot live-börsen:** börsen erbjuder `GET /webhooks/pending` som fallback. Studenten pollar istället för att ta emot push. HMAC-signaturen finns i payload oavsett leveransmetod — verifieringslogiken är identisk.
+- **Valfritt:** studenter som vill kan använda ngrok mot live-börsen för den fulla upplevelsen, men det krävs inte.
+
+### Varför HMAC-signaturverifiering är obligatoriskt
+
+Webhooks triggar portfoliouppdateringar. Att verifiera att de faktiskt kom från börsen är inte valet — det är kravet. HMAC-signaturer är mönstret GitHub, Stripe och Slack använder. Verifieringslogiken är identisk oavsett om webhooken levereras via push (mock/ngrok) eller poll (live-fallback).
+
+### Pedagogisk notering
+
+Det gemensamma marknadsflödet gör att studenter naturligt ser varandras arbete. "Varför rör sig FIKA-priset just nu?" skapar diskussioner som inte behöver orkestreras av läraren — ett av de sällsynta momenten där engagemanget driver sig självt.
+
+### Valfria issues — bedömning (2026-06-23)
+
+**05-65 (trade-history, cursor-pagination):** Tillför nytt koncept. Cursor-pagination är det verkliga mönstret för tidsseriedata och dyker upp i de flesta professionella API:er. Värt att behålla som valfri.
+
+**05-70 (socket-client):** Tillför lite. Socket.io är förkunskap från node-kursen. Att koppla som klient istället för server är inte konceptuellt nytt. Kontrastet SSE vs WebSocket kan nämnas i 05-60 istället. Överväg att ersätta med något mer värdefullt — t.ex. error handling/retry-mönster vid API-anrop, eller en dashboard-vy.
+
+**OBS:** Quizen nämner cursor-pagination men det täcks bara av den valfria 05-65. Antingen gör 05-65 obligatorisk eller ta bort cursor-frågan från quizen.
+
+### Omfattning — notering (2026-06-23)
+
+Kmom05 har sex obligatoriska issues och är den mest kodintensiva veckan. Studenten bygger: exchange client, mock-integration, marknadsvy, orderläggning, webhook-hantering med HMAC, och SSE-relay. Varje issue introducerar ett nytt koncept. Om det visar sig för tungt kan 05-60 (SSE) flyttas till kmom06 — den är fristående och kräver inte de andra kmom05-issuena för att fungera.
+
+### Öppna frågor
+
+- Hur stor är startbalansen och hur många tokens per student?
+- Hur ofta betalar yield-tokens utdelning och hur ofta triggas marknadshändelser?
+- Ska portfoliovärdet visas som kursgraf i Svelte-frontenden?
+- Hur hanteras det om börsen är nere under kursveckan?
+- Är 05-70 (socket-client) värd att behålla eller ska den ersättas?
 
 </details>

@@ -1,185 +1,175 @@
 ---
-title: "Kmom04: ER konceptuell + Transaktioner"
-description: Påbörja ER-modellering och titta på konceptet med transaktioner.
+title: 'kmom04: Testning och kvalitet'
+description: Testa varje lager på rätt sätt och formalisera kodkvalitet som en automatiserad kedja.
 revision:
-  2026-02-08: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-* 
-*/}
+Den här veckan testar du varje lager i lagerarkitekturen på rätt sätt och formaliserar kodkvalitet som en automatiserad kedja — från editorn till CI. Du kan redan Vitest + Supertest från node-kursen, men där testade du routes med logik direkt i dem. Nu har du tre distinkta lager och varje lager testas på sitt eget sätt.
 
-Vi fortsätter ER-modellen med fokus på konceptuell modellering och vi påbörjar en större modelleringsövning.
+## Issues
 
-Vi tittar på hur transaktioner i en databas fungerar och vi tränar på SQL-kod för att hantera COMMIT och ROLLBACK i så kallade ACID transaktioner.
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
 
-Vi bygger vidare på ett terminalskript i CSharp och bygger en menydriven klient som kan flytta pengar mellan två konton databasen.
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 04-10 | `unit-tests` | Enhetstester för services med mockade repositories (Vitest mock/spy) |
+| 04-20 | `integration-tests` | Integrationstester för controllers med Supertest + `mongodb-memory-server` |
+| 04-30 | `ci-quality` | CI-pipeline: lint + test + coverage-gräns (70% på services) |
+| 04-40 | `eslint-rules` | ESLint-regler för `max-lines-per-function` och `complexity` |
+| 04-50 | `quality-gate` | Pre-push hook med sonar-scanner mot lokal SonarQube — blockerar push om quality gate inte passerar |
 
+Valfria issues — gör dem om du vill utforska vidare:
 
-## Läs & Studera
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 04-55 | `contract-testing` | Enkel contract test med Bruno CLI i CI |
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+## Föreläsningar
 
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med teststrategi-föreläsningen — den ger helhetsbilden som gör att de övriga fallen känns naturliga.
 
+| Titel | Om |
+|---|---|
+| Testa lagerarkitektur — en strategi per lager | Vad och hur man testar i varje lager |
+| Vitest mock och spy — isolera services | `vi.fn()`, `vi.spyOn()`, setup och teardown |
+| CI med kodkvalitet | GitHub Actions, coverage-rapporter, ESLint som gate |
+| Shift left — CI börjar lokalt | husky, pre-push hooks, sonar-scanner med quality gate |
 
-### Föreläsning
+## Studiematerial
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
-1. [Transaktioner i databaser - ACID](/website/laromaterial/forelasning/transaktioner) ger en översikt till begreppet transaktioner i databasen och vad ACID innebär samt en liten utläggning om låsning, prestanda och tillförlitlighet i databasen.
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 04-10 | [Vitest — Mocking](https://vitest.dev/guide/mocking.html) | Förklarar `vi.fn()`, `vi.spyOn()` och hur man isolerar beroenden |
+| Issue 04-20 | [mongodb-memory-server — Quick start](https://github.com/typegoose/mongodb-memory-server#quick-start-for-testing) | Hur man startar en in-memory MongoDB-instans i tester |
+| Issue 04-50 | [Husky — Getting started](https://typicode.github.io/husky/get-started.html) | Konfigurera git hooks med husky |
 
-1. [ER-modellering - konceptuell modellering](/website/laromaterial/forelasning/er-modellering-konceptuell-modellering/) visar hur man kan rita en ER-modell via olika konstruktioner och introducerar en del begrepp om ER som underlättar ritandet.
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
+| Verktyg | Länk |
+|---|---|
+| Vitest API | [vitest.dev/api](https://vitest.dev/api/) |
+| supertest | [github.com/ladjs/supertest](https://github.com/ladjs/supertest) |
+| mongodb-memory-server | [github.com/typegoose/mongodb-memory-server](https://github.com/typegoose/mongodb-memory-server) |
+| ESLint rules | [eslint.org/docs/latest/rules](https://eslint.org/docs/latest/rules/) |
+| GitHub Actions | [docs.github.com/en/actions](https://docs.github.com/en/actions) |
 
+## Quiz
 
-### Kurslitteratur
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-Läs följande:
+Quizen för kmom04 testar om du förstår skillnaden mellan enhetstester och integrationstester, varför `mongodb-memory-server` används istället för att mocka Mongoose, vad `vi.fn()` gör, vad en coverage-gräns i CI innebär, och vad en pre-push hook är.
 
+## Redovisningstext
 
+Skriv din redovisningstext i `report/kmom04.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
-__Transaktioner__
+1. Förklara skillnaden mellan ett enhetstest av ett service och ett integrationstest av en controller. Ge ett konkret exempel på varje från din kod.
 
-1. Databasteknik
-    * Kap 24: Transaktioner
+2. Vad är `mongodb-memory-server` och varför använder du det istället för att mocka Mongoose?
 
-1. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
-    * [Transaktioner](http://www.databasteknik.se/webbkursen/transaktioner/index.html)
+3. Hur sätter du upp autentisering i dina integrationstester? Vad gör du i `beforeAll`?
 
-Det finns ytterligare ett kapitel i boken som är relaterat till transaktioner, det går utanför kursens ram men läs vid intresse.
+4. Vad mäter `max-lines-per-function` och varför är det ett bra kodkvalitetsmått?
 
-1. Databasteknik
-    * Kap 25: Hur transaktioner hanteras inuti databashanteraren
+5. Beskriv din quality gate-kedja. Vad händer om du försöker pusha kod som inte passerar SonarQubes quality gate?
 
+6. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
+## Inlämning
 
-__ER-modellering__
+1. Kör `npm run sonar` och jämför med din kmom03-scan. Notera förändringar i din redovisningstext.
+2. Stäng de GitHub-issues som du har löst klart.
+3. Skriv klart din redovisningstext i `report/kmom04.md`.
+4. Committa, tagga och pusha:
 
-1. Databasteknik
-    * Kap 5: Relationsmodellen
-
-1. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
-    * [ER-modellering i webbkursen](http://www.databasteknik.se/webbkursen/er/)
-
-
-
-### Artiklar
-
-Kika igenom följande artiklar.
-
-1. Fortsätt jobba igenom artikeln "[Kokbok för databasmodellering](https://dbwebb.se/kunskap/kokbok-for-databasmodellering)", den ger dig processen du skall följa. I detta kmom handlar det främst om att fokusera på konceptuell modellering.
-
-
-{/*
-### Ai som lärare (instuderingsfrågor)
-
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand för att träna på de koncept som är relevanta för detta kmom.
-
-<details>
-<summary>Instuderingsfrågor</summary>
-
-1. 
-
-Här är en [utskrift av när en frågesession genomförts](https://chatgpt.com/share/68bafa23-4b84-8005-a745-451d43258c9a). Dina svar kan skifta från de som visas. Var alltid kritisk till dina källor.
-
-</details>
-
-
-*/}
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom övningen "[Transaktioner i databas](/website/laromaterial/ovning/transaktioner/)" för att lära dig grunderna i hur du använder transaktioner i databaser.
-
-1. Jobba igenom övningen "[CSharp med transaktioner](/website/laromaterial/ovning/csharp-transaction/)" för att lära dig hur du använder transaktioner mot databasen från ett CSharp program.
-
-
-{/*
-Skapa en egen databas och lek runt (eller i kmom03)
--------------------------
-
-Vi leker runt och gör CREATE DATABASE/TABLE, SELECT, INSERT, UPDATE, DELETE, DROP.
-
-* [Get going with a database and SQL](https://gitlab.com/mikael-roos/database/-/tree/main/sql/ladok)
-
-*/}
-
-
-
-### Uppgifter
-
-Följande uppgifter skall utföras och resultatet skall redovisas.
-
-1. Jobba igenom uppgiften "[Uppgift: CSharp bank (kmom04)](/website/laromaterial/uppgift/kmom04-csharp/)" där du får jobba med transaktioner.
-
-1. Jobba igenom uppgiften "[Uppgift: ER-modellering - konceptuell (kmom04)](/website/laromaterial/uppgift/kmom04-er-konceptuell/)".
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Hur gick det att förstå konceptet transaktioner i databas?
-
-* Berätta hur det gick att lösa uppgiften med C#-programmet. Var det något som var svårt eller utmanande? Hur ser du på din kod och förbättringspotential kring den?
-
-* Berätta om ER-modelleringen så här långt i kursen, är modelleringsbiten något som hjälper din förståelse för hur databasen byggs upp?
-
-* Vilken är din TIL för detta kmom?
+```bash
+git add report/kmom04.md
+git commit -m "Add kmom04 report"
+git tag kmom04
+git push origin main --tags
+```
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Kärninsikten: integrationstester verifierar att systemet fungerar ihop; enhetstester av services verifierar affärslogiken isolerat. Mocka aldrig mer än du måste.
 
+### Teststrategi per lager
 
-### Måndag
+```
+Repository-lagret:
+  Testas indirekt via integrationstester (mongodb-memory-server)
+  Undvik att mocka Mongoose — det ger falsk trygghet
 
-Första timmen:
+Service-lagret:
+  Enhetstester med mockade repositories
+  Testa affärslogiken isolerat, inga HTTP-anrop
 
-* Övning med transaktioner
-* Visa hur man jobbar med transaktioner i C#.
+Controller-lagret:
+  Integrationstester med Supertest
+  Testa hela kedjan: HTTP-anrop → svar
+  Kräver auth-token i testerna (skapa testanvändare i beforeAll)
+```
 
-Andra timmen:
+### Varför `mongodb-memory-server` och inte mocks
 
-* Visa hur man bygger två tabeller och en kopplingstabell med PK och FK.
-* Dels account-tabell som delas upp i delar och dels exempel i classicmodels.
+I node-kursen rekommenderades det att inte mocka databasen — den lärdomen bärs med hit. `mongodb-memory-server` startar en riktig MongoDB-instans i minnet för testerna. Det innebär att integrationstesterna testar hela stacken utom nätverket.
 
+### Kodkvalitetskedjan
 
+kmom04 är steget där den röda tråden från kmom01 formaliseras till en automatiserad kedja:
 
-### Onsdag
+```
+Editor        SonarLint              → direkt feedback medan man skriver
+On-demand     npm run sonar          → manuell lokal scan mot SonarQube
+Pre-push      sonar-scanner hook     → automatisk gate innan push
+CI            ESLint + coverage      → gate i GitHub Actions
+```
 
-Första timmen:
+### Pre-push hook med sonar-scanner
 
-* ER-modellering, fokus konceptuell med ett exempel 
+`husky` hanterar git hooks i repot — det committas och fungerar på alla plattformar.
 
-Andra timmen:
+```bash
+# .husky/pre-push
+npm run typecheck
+npm run lint
+npm run sonar:ci
+```
 
-* Stöd för uppgiften med ER-modellering (konceptuell)
+```bash
+# package.json
+"sonar:ci": "sonar-scanner -Dsonar.qualitygate.wait=true"
+```
 
+`sonar.qualitygate.wait=true` gör att `sonar-scanner` väntar på SonarQubes svar och returnerar exit code 1 om quality gate inte passerar. Pushen blockeras.
 
-### Torsdag
+**Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. SonarLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
 
-* 
+**Varför inte SonarCloud i CI:** Kursen kör privata repos i en GitHub-organisation. SonarCloud är gratis enbart för publika repos — privata kräver betalkonto. ESLint med komplexitetsregler och coverage-trösklar är en seriös CI-gate i sig.
+
+### Pedagogisk notering
+
+70% täckning på service-lagret är ett rimligt minimikrav. Täckning på repository-lagret fångas av integrationstesterna. Täckning på controller-lagret är sekundärt — om services är väl testade och integrationstesterna täcker happy path är risken låg.
+
+Varning: det är lätt att fastna i mocking-djungeln. Läraren bör aktivt avråda från att mocka Mongoose, MongoDB eller hela HTTP-anrop inuti enhetstester.
+
+### Beslutade frågor
+
+- Bruno CLI i CI: inkluderat som valfritt issue 04-55. Contract tests i `bruno/contract/` med sekventiellt flöde. CI:s e2e-jobb kör dem automatiskt.
 
 </details>

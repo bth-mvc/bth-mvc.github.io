@@ -45,10 +45,15 @@ export default defineConfig({
 					collapsed: true,
 					autogenerate: { directory: 'intro' },
 				},
-				{
-					label: 'Kom igång',
+				{ 
+					label: 'Labbmiljö',
 					collapsed: true,
-					autogenerate: { directory: 'kom-igang' },
+					autogenerate: { directory: 'labbmiljo' },
+				},
+				{ 
+					label: 'Kursrepo',
+					collapsed: true,
+					autogenerate: { directory: 'kursrepo' },
 				},
 				{
 					label: 'Kmom01',
@@ -97,66 +102,6 @@ export default defineConfig({
 					label: 'Övrigt',
 					collapsed: true,
 					autogenerate: { directory: 'ovrigt' },
-				},
-				{
-					label: '(Läromaterial)',
-					collapsed: true,
-					/* autogenerate: { directory: 'laromaterial' }, */
-					items: [
-						'laromaterial',
-						{ 
-							label: 'Labbmiljö (grund)',
-							autogenerate: { directory: 'laromaterial/labbmiljo' },
-							collapsed: true,
-						},
-						{ 
-							label: 'Labbmiljö (MariaDB)',
-							autogenerate: { directory: 'laromaterial/labbmiljo-mariadb' },
-							collapsed: true,
-						},
-						{ 
-							label: 'Kursrepo',
-							autogenerate: { directory: 'laromaterial/kursrepo' },
-							collapsed: true,
-						},
-						/*{ 
-							label: '⚠️ Kursrepo utvecklingsmiljö',
-							autogenerate: { directory: 'laromaterial/kursrepo-utvecklingsmiljo' },
-							collapsed: true,
-						},*/
-						{ 
-							label: 'Föreläsning',
-							autogenerate: { directory: 'laromaterial/forelasning' },
-							collapsed: true,
-						},
-						{ 
-							label: 'Övning',
-							autogenerate: { directory: 'laromaterial/ovning' },
-							collapsed: true,
-						},
-						/*{ 
-							label: '⚠️ Lab',
-							collapsed: true,
-							items: [
-								'laromaterial/lab',
-								'laromaterial/lab/lab_01/readme',
-								'laromaterial/lab/lab_02/readme',
-								'laromaterial/lab/lab_03/readme',
-								'laromaterial/lab/lab_04/readme',
-								'laromaterial/lab/readme',
-							],
-						},*/
-						{ 
-							label: 'Uppgift',
-							autogenerate: { directory: 'laromaterial/uppgift' },
-							collapsed: true,
-						},
-						{ 
-							label: 'Instruktion',
-							autogenerate: { directory: 'laromaterial/instruktion' },
-							collapsed: true,
-						},
-					],
 				},
 			],
 		}),

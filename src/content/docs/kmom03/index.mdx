@@ -1,179 +1,166 @@
 ---
-title: "Kmom03: ER intro + CSharp"
-description: Vi jobbar vidare med ER-modellering och .
+title: 'kmom03: Säkerhet'
+description: Upplev webbsäkerhetsproblem direkt i din app och implementera skydden mot dem.
 revision:
-  2026-01-31: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-* 
-*
-*/}
+Den här veckan arbetar du med säkerhet som ett upplevt problem — inte som ett paket man installerar. Varje issue börjar med en attack mot din egna app. Du ser sårbarheten med egna ögon, förstår hur den utnyttjas och implementerar sedan skyddet i backenden. Tillsammans täcker veckans issues sex av OWASP Top Ten 2025-kategorierna: A01:2025, A02:2025, A04:2025, A05:2025, A07:2025 och A09:2025.
 
-Vi bekantar oss men en ny databas som heter Classic Models. Databasen innehåller information om ett företag som säljer modellbilar. Vi skall läsa in databasen i vår MariaDB-server och sedan använda både terminalklienten och desktopklienten för att analysera databasens schema och dess innehåll.
+## Issues
 
-Du får skapa ett applikationsprogram i terminalen med CSharp som kopplar sig mot databasen och presenterar resultat från databasfrågor.
+Arbeta igenom issues i ordning. Varje issue börjar med att du demonstrerar en attack, och avslutas med att du verifierar att attacken inte längre fungerar.
 
-Vi övar i hur man modellerar och bygger upp en databas, det som kallas Entity-Relationship modelling, ER-modellering, eller bara databasmodellering. Vi delar in modelleringen i konceptuell, logisk och fysisk modellering. 
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
+| Issue | Namn | Attack som demonstreras | Fix du implementerar |
+|---|---|---|---|
+| 03-10 | `xss` | Injicerat script via inmatningsfält renderas i UI:t | Content-Security-Policy via Helmet, sanitera lagrad input |
+| 03-20 | `csrf` | Förfalskad förfrågan från evil.html utnyttjar inloggad session | `SameSite=strict` på JWT-cookie, CSRF-token för mutationer |
+| 03-30 | `cors` | Wildcard CORS + credentials läcker data till annan origin | Explicit origin-lista, korrekt preflight-hantering |
+| 03-40 | `helmet` | Saknade säkerhetsheaders synliga i browser dev tools | Helmet med genomgång av vad varje header skyddar mot |
+| 03-50 | `rate-limiting` | Script hamrar login-endpointen utan begränsning | `express-rate-limit` på auth-routes |
+| 03-60 | `password-change` | Byt lösenord utan att känna till det gamla | `PATCH /api/me/password` — verifiera nuvarande lösenord |
+| 03-70 | `crypto` | bcrypt-hash i klartext i logg, lösenordsjämförelse med `===` | Korrekt bcrypt cost factor, timing-säker jämföring, rensa känslig data ur loggar |
 
-{/*
-## Labbmiljö
+Valfria issues — gör dem om du vill utforska vidare:
 
-Installera följande.
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 03-75 | `secure-logging` | Säker loggning med Pino — logga misslyckade inloggningar, filtrera bort känslig data |
+| 03-80 | `brute-force` | Räkna misslyckade inloggningsförsök, lås konto temporärt |
+| 03-85 | `refresh-tokens` | Refresh tokens + token rotation — ny token vid varje refresh |
 
-1. Programmeringsmiljön för CSharp.
-*/}
+## Föreläsningar
 
+Titta igenom föreläsningarna innan du börjar med respektive issue. OWASP Top Ten-föreläsningen ger helhetsbilden — titta på den innan du startar veckans första issue.
 
+| Titel | Om |
+|---|---|
+| OWASP Top Ten — ett ramverk för webbsäkerhet | Genomgång av de tio vanligaste sårbarhetskategorierna, koppling till veckans issues |
+| XSS — angrepp och försvar | Injektionstyper, CSP, sanitering på server vs klient |
+| CSRF — varför cookies är en attackyta | SameSite, CSRF-tokens, när vilket skydd räcker |
+| CORS och same-origin policy | Preflight, credentials, korrekt konfiguration |
+| HTTP Security Headers med Helmet | Vad varje header skyddar mot, demo i dev tools |
+| Rate limiting och brute force-skydd | express-rate-limit, när och var man rate-limitar |
+| A02 — Kryptografiska svagheter i auth | bcrypt cost factor, timing attacks, JWT-hemlighetens styrka |
 
-## Läs & Studera
+## Studiematerial
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 03-10 | [MDN — Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) | Förklarar hur CSP-headers fungerar och vad de skyddar mot |
+| Issue 03-20 | [OWASP — CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) | Förklarar attacken och tillgängliga skyddsmekanismer |
+| Issue 03-30 | [MDN — CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) | Hur same-origin policy fungerar och vad CORS-headers gör |
+| Issue 03-70 | [OWASP — Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) | Varför bcrypt är rätt val och vad cost factor innebär |
 
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
-### Föreläsning
+| Verktyg | Länk |
+|---|---|
+| OWASP Top Ten 2025 | [owasp.org/Top10/2025](https://owasp.org/Top10/2025/) |
+| Helmet dokumentation | [helmetjs.github.io](https://helmetjs.github.io) |
+| express-rate-limit | [npmjs.com/package/express-rate-limit](https://www.npmjs.com/package/express-rate-limit) |
+| MDN — SameSite cookies | [MDN — SameSite](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value) |
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+## Quiz
 
-{/* 1. CSharp och databaser. */}
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-1. [Modellera databas - faser och steg](/website/laromaterial/forelasning/modellera-databas-faser-och-steg/) ger en översikt av modellering av databaser och visar olika faser och steg för att modellera databasen.
+Quizen för kmom03 testar om du förstår vad XSS och CSRF är, hur same-origin policy och CORS hänger ihop, varför `SameSite=strict` skyddar mot CSRF, vad bcrypt cost factor innebär, och varför lösenord aldrig ska jämföras med `===`.
 
+## Redovisningstext
 
+Skriv din redovisningstext i `report/kmom03.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
-### Kurslitteratur
+1. Beskriv XSS-attacken du demonstrerade. Vilka åtgärder implementerade du och vad skyddar varje åtgärd mot?
 
-Läs följande:
+2. Vad är CSRF och varför är httpOnly-cookies en attackyta? Hur löste du det?
 
-1. Databasteknik - om avancerad SQL.
-    * Kap 21: SQL inuti ett program
+3. Förklara hur CORS fungerar. Vad är en preflight-request och vad händer om origin är wildcard med credentials?
 
-1. Databasteknik - om ER modellering.
-    * Kap 2: ER-modellering
-    * Kap 4: Designprocessen
+4. Välj två headers som Helmet lägger till och förklara vad de skyddar mot.
 
-1. [Boken har även en webbplats](http://www.databasteknik.se/webbkursen/) och vissa utdrag från boken finns där. Relevant för detta kmom är följande:
-    * [ER-modellering i webbkursen](http://www.databasteknik.se/webbkursen/er/)
+5. Varför måste `PATCH /api/me/password` verifiera det nuvarande lösenordet, trots att användaren redan är inloggad?
 
+6. Vad är ett timing attack och varför är `bcrypt.compare()` säkert mot det? Vad händer om man jämför lösenord med `===` istället?
 
+7. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
-### Artiklar
+## Inlämning
 
-Kika igenom följande artiklar.
+1. Kör `npm run sonar` och jämför med din kmom02-scan. Notera förändringar i din redovisningstext.
+2. Stäng de GitHub-issues som du har löst klart.
+3. Skriv klart din redovisningstext i `report/kmom03.md`.
+4. Committa, tagga och pusha:
 
-1. Läs igenom igenom artikeln "[Kokbok för databasmodellering](https://dbwebb.se/kunskap/kokbok-for-databasmodellering)", den ger dig en metod för att modellera databaser i olika faser. Du kommer jobba enligt denna modellen i uppgiften. I detta kmom läser du först och främst delen om "Konceptuell modellering".
-
-
-
-{/*
-### Ai som lärare (instuderingsfrågor)
-
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand för att träna på de koncept som är relevanta för detta kmom.
-
-<details>
-<summary>Instuderingsfrågor</summary>
-
-1. 
-
-Här är en [utskrift av när en frågesession genomförts](https://chatgpt.com/share/68bafa23-4b84-8005-a745-451d43258c9a). Dina svar kan skifta från de som visas. Var alltid kritisk till dina källor.
-
-</details>
-*/}
-
-
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom övningen "[Övning databasen Classic Models](/website/laromaterial/ovning/classicmodels/)". Övningen hjälper dig igång med en ny databas och undersöka dess schema och innehåll.
-
-1. Jobba igenom övningen "[Övning CSharp med databasen Classic Models](/website/laromaterial/ovning/csharp/)". Övningen hjälper dig igång med CSharp och konstruktioner för att exekvera databasfrågor och ta hand om resultatet.
-
-{/* Modelleringsövningsuppgifter
-https://docs.google.com/document/d/1kKoSO2BQL5T2cnzshpM_hnk5JbqT0_00khfGJKZQ2Fo/edit
-
-Gjort modelleringsövning i sal med draw.io: https://goo.gl/vNRvKt */}
-
-
-
-### Uppgifter
-
-Följande uppgifter skall utföras och resultatet skall redovisas.
-
-1. Genomför uppgiften "[Uppgift: CSharp](/website/laromaterial/uppgift/kmom03-csharp/)".
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Hur gick det att jobba med CSharp mot databasen Classic Models, några reflektioner?
-* Berätta om din kodstruktur i ditt terminalprogram mot databasen, är du nöjd eller ser du förbättringspotential?
-
-* Hur gick det att jobba med ER-modelleringen, några reflektioner?
-* Ser du likheter eller skillnader mellan databasmodellering och modellering av objekt i objektorienterad programmering?
-
-* Fanns det några extra svårigheter/utmaningar du kämpade med i kursmomentet?
-
-* Vilken är din TIL för detta kmom?
+```bash
+git add report/kmom03.md
+git commit -m "Add kmom03 report"
+git tag kmom03
+git push origin main --tags
+```
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Säkerhet som ett upplevt problem, inte ett paket man installerar. Varje issue börjar med en attack mot studentens egna app — studenten ser sårbarheten med egna ögon, förstår hur den utnyttjas, och implementerar sedan fixarna i backenden.
 
+Svelte-frontenden är medvetet byggd med säkerhetshål som aktiveras i en "attack-läge"-vy i UI:t. Det gör attackerna påtagliga utan att studenten behöver sätta upp en separat angripare.
 
-### Måndag
+Studenterna kan sedan node-kursen: JWT i httpOnly-cookies, bcrypt, auth-middleware. Auth-koden finns färdigskriven i kursens template — den är inte ett lärandemål utan förutsättningen för att attackerna i det här momentet ska vara meningsfulla.
 
-Första timmen:
+### Upplägget per issue
 
-* Övningen med att komma igång med databasen classicmodels.
+Varje obligatoriskt issue följer samma struktur:
 
-Andra timmen:
+1. **Attacken** — studenten kör attack-demonstrationen i frontenden och ser vad som händer
+2. **Förklaringen** — vad är sårbarheten, hur fungerar attacken, vad är risken i verkligheten
+3. **Fixarna** — studenten implementerar skyddet i backenden
+4. **Verifiering** — studenten kör demonstrationen igen och bekräftar att attacken inte längre fungerar
 
-* Programmera med CSharp mot databasen classicmodels.
+### Vad frontenden låser upp
 
+`PATCH /api/me/password` → "Byt lösenord"-formulär i profilvyn aktiveras.
+Attack-läget i UI:t stängs av steg för steg när studenten implementerar varje fix.
 
+### GET /api/me — profilvyn
 
-### Onsdag
+Överväg att lägga till `GET /api/me` som ett issue i kmom03, kopplat till `password-change` (03-60). Motivering:
 
-Första timmen:
+- `/api/me` är en naturlig resurs: GET hämtar profil, PATCH byter lösenord — samma resurs, två metoder
+- Profilvyn kan visa namn + email direkt från databasen (inte sessionStorage-cachen) och därefter lösenordsformuläret
+- Istället för att låsa upp profilvyn med `PATCH /api/me/password` låser den upp med `GET /api/me` — studenten måste implementera båda för att profilen ska vara komplett
+- Gör det klickbart att klicka på inloggad användares email i headern → navigerar till `/profile`
 
-* ER-modellering med relationer, många till många (M-N)
-* ER-modellering, övning med M-N relation
-* "Samma" text på olika sätt
-* Kokboken 10 steg
+Om det läggs till bör issue-numret vara 03-55 (mellan 03-50 rate-limiting och 03-60 password-change).
 
-Andra timmen:
+### Pedagogisk notering
 
-* Konceptuell ER-modellering av WoW med M-N relation, steg 1-6
+Attack-first-upplägget kräver att kursteamet bygger demonstrationerna in i Svelte-frontenden. Det är ett icke-trivialt arbete men avgörande för att momentet ska fungera — en textuell beskrivning av en attack är inte alls lika effektiv som att se den köras.
 
+**XSS** är den vanligaste sårbarheten på webben. Att se ett injicerat script köras i sin egna app är en stark upplevelse som är svår att glömma.
 
-### Torsdag
+**CSRF** är extra relevant för den här kursen eftersom auth bygger på httpOnly-cookies — exakt den angreppsytan som CSRF exploaterar. `SameSite=strict` är en enradsfix men studenten förstår varför den behövs.
 
-* Labbmiljön med CSharp på plats
-* Övningen med terminalprogram i CSharp klar
-* Övningen med classicalmodels klar
-* Uppgiften med terminalprogram i CSharp påbörjad
+**CORS** hanteras ofta som "lägg till cors-paketet och sätt wildcard". Attacken visar att wildcard + credentials faktiskt läcker data.
+
+Refresh tokens (valfritt) ökar komplexiteten i auth-flödet märkbart. Det läggs valfritt med tydlig varning om att implementationen är subtil.
+
+### Öppna frågor
+
+- Hur mycket av XSS-fixarna hamnar i frontenden vs backenden? Frontendsanitering är inte studentens ansvar i den här kursen — fokus ska vara på CSP-headers och serversanitering.
+- Ska HTTPS-konfiguration i Docker ingå? Konceptuellt viktigt, men certifikat-hantering lokalt är friktion. Möjligen en kort föreläsning utan obligatoriskt issue — HTTPS i produktion hör hemma i ops-kursen.
 
 </details>

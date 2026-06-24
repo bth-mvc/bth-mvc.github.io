@@ -11,7 +11,7 @@ Kursplanen är kursens formella dokument som fastställts av högskolan. När ku
 
 ## Aktuell kursplan
 
-Från och med våren 2026 hittar du [kursplanen genom att söka på kurskoden DV1703 via BTH's hemsida](https://plan.bth.se/courses/DV1703) och kursen heter "Databasteknik".
+Från och med hösten 2026 hittar du [kursplanen genom att söka på kurskoden DV1708 via BTH's hemsida](https://plan.bth.se/courses/DV1708) och kursen heter "Webbprogrammering backend".
 
 
 <!--

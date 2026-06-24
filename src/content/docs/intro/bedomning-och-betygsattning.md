@@ -1,5 +1,5 @@
 ---
-title: Bedömning och betygsättning
+title: Bedömning och betygsättning ⚠️
 description: Hur sätts kursens betyg.
 sidebar:
     order: 150
