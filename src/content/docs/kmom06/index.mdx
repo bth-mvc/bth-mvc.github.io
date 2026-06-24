@@ -1,152 +1,172 @@
 ---
-title: "Kmom06: ER fysisk + Triggers ⚠️"
-description: Avsluta ER-modelleringen och lär dig om begreppet triggers.
+title: 'kmom06: Tjänster och robusthet'
+description: Bygg intelligenta tjänster och gör börskopplingen robust mot fel.
 revision:
-  2026-02-20: (A, mos) Första versionen. 
+  2026-06-01: (A, mos) Första versionen.
 ---
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-{/* TODO
-* UNION (borde skapa övning på detta?)
-* INSERT ON DUPLICATE KEY UPDATE? (borde skapa övning på denna?)
-* OUTER JOIN product/order/orderdetails (borde skapa övning på denna?)
-*/}
+Den här veckan bygger du intelligenta tjänster ovanpå börskopplingen från kmom05. Din server gör nu mer än att relay:a data — den analyserar prisflödet, reagerar på händelser och håller sin integration robust mot fel. Det är steget från "det fungerar" till "det fungerar även när den externa servern beter sig oförutsägbart."
 
-Vi slutför ER-modellen med fokus på fysisk modellering. Vi skapar SQL-kod som skapar databasens schema.
+## Issues
 
-Vi jobbar vidare med hur man programmerar i databasen med hjälp av triggers.
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
 
+Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 06-10 | `idempotent-webhooks` | Lagra webhook-ID:n, ignorera dubbletter — samma affär ska aldrig bokföras två gånger |
+| 06-20 | `retry` | Exponential backoff vid 429 och nätverksfel mot börsen, respektera `Retry-After`-headern |
+| 06-30 | `price-alerts` | Service som bevakar SSE-flödet och triggar notis när ett token-pris passerar ett tröskelvärde |
+| 06-40 | `structured-logging` | Strukturerad loggning med Pino — logga händelser, aldrig känslig data (kopplar till A09 från kmom03) |
+| 06-50 | `go-live` | Byt från mock till den riktiga börsen, verifiera att allt fungerar, hämta och visa leaderboard |
 
-## Läs & Studera
+Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utökningar i kmom10.
 
-Här kan du på egen hand studera och förbereda dig inför övningar och uppgifter.
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 06-55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) |
+| 06-60 | `portfolio-analytics` | Beräkna avkastning per token, bäst/sämst presterande, total portföljutveckling |
+| 06-65 | `circuit-breaker` | Enkel circuit breaker: sluta anropa börsen temporärt efter upprepade fel, återförsök efter timeout |
 
+## Föreläsningar
 
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med robusthet-föreläsningen — den ger bakgrunden till varför idempotens och retry är nödvändigt.
 
-### Föreläsning
+| Titel | Om |
+|---|---|
+| Robusthet mot externa API:er | Retry, backoff, timeout, circuit breaker — mönster för att hantera opålitliga beroenden |
+| Idempotens — design för upprepade anrop | At-least-once delivery, idempotency keys, när och hur man lagrar webhook-state |
+| Bakgrundstjänster i Express | Services som körs kontinuerligt, livscykelhantering, graceful shutdown |
+| Strukturerad loggning i produktion | Pino, log levels, vad som loggas och vad som inte får loggas |
 
-Titta på följande inspelade föreläsningar. Föreläsningarna kan innehålla tips om läsanvisningar.
+## Studiematerial
 
-1. [Trigger i databasen](/website/laromaterial/forelasning/trigger) om konceptet "programmera i databasen" och hur triggers passar in i den möjligheten.
+**Läsning** — Läs igenom dessa innan du börjar med respektive issue. Det handlar inte om att memorera — det handlar om att få en bild av varför saker fungerar som de gör, så att koden känns logisk snarare än som magi du kopierar.
 
+| Läs innan | Titel | Varför |
+|---|---|---|
+| Issue 06-10 | [MDN — Idempotent](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent) | Förklarar idempotens-konceptet och varför det är viktigt i distribuerade system |
+| Issue 06-20 | [AWS — Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) | Förklarar varför enkel retry utan backoff skapar thundering herd-problem |
+| Issue 06-40 | [Pino dokumentation — Getting started](https://getpino.io/#/) | Strukturerad loggning med Pino — log levels, serializers, child loggers |
 
+**Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
-### Kurslitteratur
+| Verktyg | Länk |
+|---|---|
+| Pino dokumentation | [getpino.io](https://getpino.io/#/) |
+| Pino API reference | [getpino.io/#/docs/api](https://getpino.io/#/docs/api) |
 
-Läs följande:
+## Quiz
 
-1. Databasteknik
-    * Kap 16: Aktiva databaser och triggers
-    * Kap 8: Mer om SQL: Aggregatfunktioner, null-värden, yttre join (främst delen med yttre join)
+När du är klar med veckans issues gör du quizen som finns i Canvas.
 
+Quizen för kmom06 testar om du förstår vad idempotens är och varför det behövs för webhooks, hur exponential backoff fungerar, vad en circuit breaker är, varför känslig data aldrig ska loggas, och vad "at least once delivery" innebär.
 
+## Redovisningstext
 
-### Artiklar
+Skriv din redovisningstext i `report/kmom06.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
 
-Kika igenom följande artiklar.
+1. Vad är idempotens och varför är det viktigt för webhook-hantering? Hur implementerade du det?
 
-1. I manualen för MariaDB kan du läsa om triggers, det är främst följande kapitel som är relevanta, bekanta dig med dem, du kommer att träna på begreppen i kommande övningar.
-    * [Triggers](https://mariadb.com/docs/server/server-usage/triggers-events/triggers)
+2. Beskriv din retry-logik. Vad händer om börsen returnerar 429 tre gånger i rad?
 
-1. Fortsätt jobba igenom artikeln "[Kokbok för databasmodellering](https://dbwebb.se/kunskap/kokbok-for-databasmodellering)", den ger dig processen du skall följa. I detta kmom handlar det främst om att fokusera på fysisk modellering.
+3. Hur fungerar din prisnotifieringstjänst? Vad händer i kedjan från att börsen skickar ett pris till att användaren ser notisen?
 
+4. Vad loggar du och vad loggar du *inte*? Motivera med ett konkret exempel från din kod.
 
+5. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
 
-{/*
-### Ai som lärare (instuderingsfrågor)
+## Inlämning
 
-Här finns ett antal instuderingsfrågor som hjälper dig att finna information på egen hand för att träna på de koncept som är relevanta för detta kmom.
+1. Kör `npm run sonar` och jämför med din kmom05-scan. Notera förändringar i din redovisningstext.
+2. Stäng de GitHub-issues som du har löst klart.
+3. Skriv klart din redovisningstext i `report/kmom06.md`.
+4. Committa, tagga och pusha:
 
-<details>
-<summary>Instuderingsfrågor</summary>
+```bash
+git add report/kmom06.md
+git commit -m "Add kmom06 report"
+git tag kmom06
+git push origin main --tags
+```
 
-1. 
+4. Öppna en pull request från `main` till `bth/submit/kmom06` i ditt repo.
 
-Här är en [utskrift av när en frågesession genomförts](https://chatgpt.com/share/68bafa23-4b84-8005-a745-451d43258c9a). Dina svar kan skifta från de som visas. Var alltid kritisk till dina källor.
-
-</details>
-
-*/}
-
-
-
-## Övningar & Uppgifter
-
-Övningar är träning inför uppgifterna. Uppgifter skall utföras och redovisas.
-
-
-
-### Övningar
-
-Jobba igenom övningarna, de förbereder dig inför uppgifterna.
-
-1. Jobba igenom "[Övning: Triggers i databas](/website/laromaterial/ovning/triggers/)" för att lära dig om triggers och vad du kan göra med dem.
-
-
-
-### Uppgifter
-
-Följande uppgifter skall utföras och resultatet skall redovisas.
-
-1. Jobba igenom "[Uppgift: CSharp bank (kmom06)](/website/laromaterial/uppgift/kmom06-csharp/)" för att lära dig om triggers och vad du kan göra med dem.
-
-1. Jobba igenom uppgiften "[Uppgift: ER-modellering - fysisk (kmom06)](/website/laromaterial/uppgift/kmom06-er-fysisk/)".
-
-1. När du är helt klar med detta kursmomentet (och kmom04, kmom05) så lämnar du in genom att göra en pull request (PR) mot din branch `bth/submit/kmom06`. Om du behöver hjälp med att göra en PR så läser du [instruktionen om hur du gör en PR i kmom03](/website/laromaterial/instruktion/gor-en-pr-for-kmom03/).
-
-
-
-## Resultat & Redovisning
-
-Läs [instruktionen om hur du skall redovisa](/website/laromaterial/instruktion/resultat-och-redovisning).
-
-Se till att följande frågor besvaras i din redovisningstext i din rapportsida.
-
-* Hur gick det att komma igång med triggers?
-* Hur är din syn på att "programmera" med triggers i databasen, jämför med att skriva motsvarande kod i klienten eller i en lagrad procedur?
-* Skriv ett kort stycke (2-5 meningar) om triggers där du förklarar begreppen (fördel, nackdel, användningsområde) för en som inte är insatt.
-
-* Hur vill du sammanfatta ditt arbete med ER-uppgiften, nu när du är klar med den efter tre veckors arbete? Blev det en bra databas?
-
-* Vilken är din TIL för detta kmom?
+Läraren läser din redovisningstext via `report/kmom06.md` i PR:en.
 
 
 
 ## Kommentarer & Noteringar
 
 <details>
-<summary>Plan för veckans genomgångar</summary>
+<summary>Planeringsanteckningar för läraren</summary>
 
-Följande är en plan för hur lärarteamet _kan_ lägga upp genomgångarna under veckan för detta kursmoment.
+### Fokus
 
+Bygg intelligenta tjänster ovanpå börskopplingen från kmom05. Studentens server gör nu mer än att relay:a data — den analyserar prisflödet, reagerar på händelser och håller sin integration robust mot fel.
 
+### Prisnotifieringstjänsten
 
-### Måndag
+Studenten bygger en service som lyssnar kontinuerligt på SSE-flödet från börsen och jämför inkommande priser mot sparade trösklar i MongoDB:
 
-Första timmen:
+```typescript
+// price-alert.service.ts
+class PriceAlertService {
+  async checkPrice(token: string, price: number): Promise<void> {
+    const alerts = await this.alertRepository.findTriggerable(token, price)
+    for (const alert of alerts) {
+      await this.notifyUser(alert)
+      await this.alertRepository.markTriggered(alert.id)
+    }
+  }
+}
+```
 
-* Övning med triggers, hur kan en loggtabell fungera?
+När ett tröskelvärde passeras skickas notisen till frontenden via studentens egna SSE-anslutning.
 
-Andra timmen:
+### Idempotent webhook-hantering
 
-* UNION
-* JOIN product, order, orderrows
-* OUTER JOIN
+Webhooks kan levereras mer än en gång — "at least once delivery". Utan idempotens-hantering bokas samma affär dubbelt i portfolion.
 
+```typescript
+const existing = await this.webhookLogRepository.findById(webhookId)
+if (existing) return // already processed
 
-### Onsdag
+await this.processOrder(payload)
+await this.webhookLogRepository.save(webhookId)
+```
 
-* ER-modellering, fokus fysisk med ett exempel 
-* Gör en delmängd av biblioteket och testa först
-* Gå igenom biblioteket
-* Stöd för uppgiften med ER-modellering (fysisk)
+### Strukturerad loggning
 
+```typescript
+// Rätt
+logger.info({ event: 'order_matched', tokenId, userId, amount }, 'Order matched')
+logger.warn({ event: 'webhook_duplicate', webhookId }, 'Duplicate webhook ignored')
+logger.error({ event: 'exchange_error', status: err.status }, 'Exchange API failed')
 
-### Torsdag
+// Fel — loggar aldrig
+logger.info({ apiKey, jwtToken, password })
+```
 
-* 
+Koppling till OWASP A09 från kmom03: en logg som läcker API-nycklar eller tokens är en säkerhetsbrist, inte bara dålig praxis.
+
+### Pedagogisk notering
+
+Idempotens är ett begrepp många studenter möter för första gången här. Det är värt att lägga tid på i föreläsning — "at least once delivery" är ett fundamentalt designbeslut i alla distribuerade system och återkommer i meddelandeköer, betalningssystem och mikrotjänstarkitekturer.
+
+Prisnotifieringstjänsten är det roligaste momentet: studenten ser sin egen notis dyka upp i frontenden när priset passerar tröskeln.
+
+### Quiz-mismatch (2026-06-24)
+
+Quizen nämner circuit breaker men det är inte en egen issue längre. Ändra frågan till "beskriv konceptet" (covered i 06-20:s bakgrundstext om exponential backoff) eller ta bort den.
+
+### Öppna frågor
+
+- Ska graceful shutdown vara ett eget issue? Det är viktigt (stäng SSE-anslutningar ordentligt vid `SIGTERM`) men kan också vara en del av issue 06-40 (logging/robusthet).
+- Ska portfolio-analytics (valfritt 06-45) kopplas mot en ny vy i Svelte-frontenden?
 
 </details>

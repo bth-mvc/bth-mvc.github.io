@@ -25,12 +25,11 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 | 05-50 | `webhooks` | Ta emot och HMAC-verifiera webhooks (mock-server lokalt, polling-fallback mot live-börsen) |
 | 05-60 | `sse-feed` | Prenumerera på börsens SSE-flöde, relay:a realtidspriser och händelser till Svelte via egen SSE |
 
-Valfria issues — gör dem om du vill utforska vidare:
+Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utökningar i kmom10.
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
 | 05-65 | `trade-history` | Hämta och visa paginerad handelshistorik med cursor-pagination |
-| 05-70 | `socket-client` | Koppla som Socket.io-klient mot börsens handelsgolv-chatt |
 
 ## Föreläsningar
 
@@ -50,8 +49,8 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med
 
 | Läs innan | Titel | Varför |
 |---|---|---|
-| Issue 05-40 | [GitHub Docs — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) | Förklarar HMAC-signaturverifiering i praktiken — samma mönster som börsen använder |
-| Issue 05-50 | [MDN — Server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) | SSE-formatet, EventSource och reconnect-beteende |
+| Issue 05-50 | [GitHub Docs — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) | Förklarar HMAC-signaturverifiering i praktiken — samma mönster som börsen använder |
+| Issue 05-60 | [MDN — Server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) | SSE-formatet, EventSource och reconnect-beteende |
 
 **Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
@@ -60,6 +59,7 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med
 | Börsserverns API-dokumentation | Se Swagger-länk i repots README |
 | MDN — EventSource | [MDN — EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) |
 | MDN — Using SSE | [MDN — Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) |
+| eventsource (npm) | [npmjs.com/package/eventsource](https://www.npmjs.com/package/eventsource) |
 | Node.js crypto (HMAC) | [nodejs.org/api/crypto.html](https://nodejs.org/api/crypto.html) |
 
 ## Quiz
@@ -181,7 +181,7 @@ Det gemensamma marknadsflödet gör att studenter naturligt ser varandras arbete
 
 **05-65 (trade-history, cursor-pagination):** Tillför nytt koncept. Cursor-pagination är det verkliga mönstret för tidsseriedata och dyker upp i de flesta professionella API:er. Värt att behålla som valfri.
 
-**05-70 (socket-client):** Tillför lite. Socket.io är förkunskap från node-kursen. Att koppla som klient istället för server är inte konceptuellt nytt. Kontrastet SSE vs WebSocket kan nämnas i 05-60 istället. Överväg att ersätta med något mer värdefullt — t.ex. error handling/retry-mönster vid API-anrop, eller en dashboard-vy.
+**05-70 (socket-client):** Borttagen (2026-06-24). Socket.io är förkunskap från node-kursen och tillför inte tillräckligt. Socket.io mellan containers (sticky sessions, reverse proxy) är ett ops-ämne — noterat i NEXT-COURSE.md.
 
 **OBS:** Quizen nämner cursor-pagination men det täcks bara av den valfria 05-65. Antingen gör 05-65 obligatorisk eller ta bort cursor-frågan från quizen.
 
@@ -195,6 +195,5 @@ Kmom05 har sex obligatoriska issues och är den mest kodintensiva veckan. Studen
 - Hur ofta betalar yield-tokens utdelning och hur ofta triggas marknadshändelser?
 - Ska portfoliovärdet visas som kursgraf i Svelte-frontenden?
 - Hur hanteras det om börsen är nere under kursveckan?
-- Är 05-70 (socket-client) värd att behålla eller ska den ersättas?
 
 </details>
