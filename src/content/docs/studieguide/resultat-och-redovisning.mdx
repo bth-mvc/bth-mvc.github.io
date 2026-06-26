@@ -1,5 +1,5 @@
 ---
-title: "Resultat och redovisning ⚠️" 
+title: "Resultat och redovisning" 
 description: Så här skall du redovisa varje kmom.
 sidebar:
     order: 0800
@@ -11,7 +11,7 @@ Som ett sista steg i varje kursmoment skall du redovisa. Gör så här.
 
 ## Skriv redovisningstext
 
-Du skriver din redovisningstext i din webbplats för kursen under sidan "Redovisa".
+Du skriver din redovisningstext i filen `report/kmomXX.md` i ditt repo (byt ut `XX` mot aktuellt kursmomentnummer, t.ex. `report/kmom01.md`).
 
 I din redovisningstext beskriver du dina reflektioner från kursmomentet, vad som gick bra och om något var mer utmanande. Reflektera över svårigheter, problem, lösningar, erfarenheter, lärdomar, resultatet, etc.
 
@@ -20,10 +20,6 @@ Besvara de specifika frågor som finns för varje uppgift och kursmoment.
 Skriv ett stycke om totalt 15-20 meningar för varje kursmoment. Försök väva in frågorna i löpande text.
 
 Kan du koppla och jämföra (reflektera) dina lärdomar från nuvarande kursmoment mot andra kursmoment, kurser eller andra lärdomar du har sedan tidigare? Sånt gillar lärare.
-
-{/*
-Läs gärna hur du kan skriva [en bra redovisningstext](kurser/faq/att-skriva-en-bra-redovisningstext).
-*/}
 
 
 
@@ -66,14 +62,15 @@ Som ett sista steg i din inlämning så kan du kontrollera att GitHub verkligen 
 
 ## Självtest
 
-Gör ett självtest och dubbelkolla att allt finns publicerat på GitHub Pages. Den vanligaste anledningen till komplettering är att man missat någon liten del som står i kraven för uppgiften. Gör en egen självtest att du uppfyller alla kraven i uppgiften, det kan spara en del tid. Dessutom vill man alltid göra en perfekt inlämning, eller hur?
+Gör ett självtest och dubbelkolla att du uppfyllt alla krav i kursmomentet. Den vanligaste anledningen till komplettering är att man missat någon liten del. Gör en egen genomgång innan du lämnar in — det sparar tid. Dessutom vill man alltid göra en perfekt inlämning, eller hur?
 
-Missa inte att köra lintern.
+Missa inte att köra hela kvalitetssviten.
 
-```bash title="Kör eslint."
-# Gå till roten av ditt kursrepo
-npm run eslint
+```bash title="Kör typecheck, lint, formatering och tester."
+npm run check
 ```
+
+Allt skall vara grönt innan du lämnar in.
 
 
 
@@ -107,21 +104,6 @@ Det sker ingen betygsättning, bedömning eller återkoppling när du är klar o
 
 I samband med att du lämnar in kmom03, kmom06 och kmom10 skall du även göra en pull request (PR) på GitHub för att visa att du gör din inlämning.
 
-Gör så här.
-
-:::danger
-Beskriv hur studenten gör en inlämning via en PR.
-:::
+Följ instruktionen i [Gör en Pull Request (PR)](../gor-en-pr/) för att skapa din PR.
 
 Läraren kommer att titta på din inlämning och betygsätta den.
-
-
-
-{/*
-Feedback och frågor 
----------------------------------------
-
-[Vilken feedback kan jag förvänta mig](kurser/faq/vilken-feedback-far-man-pa-inlamningarna)?
-
-Ställ dina frågor och funderingar i de kanaler som erbjuds i kursen. Se till att du får dina frågor besvarade. Fråga igen om något är oklart. Se till att din fråga alltid blir besvarad.
-*/}
