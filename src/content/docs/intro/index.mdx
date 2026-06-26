@@ -1,48 +1,44 @@
 ---
-title: Kursen mvc ⚠️
-description: Kursen Databasteknik har lär ut teori och praktik i databasteknik med relationsdatabaser och SQL tillsammans med applikationsprogrammering mot en databas.
+title: Kursen mvc
+description: Kursen mvc lär ut TypeScript, lagerarkitektur, säkerhet och extern API-integration genom att bygga en börsklientapp från grunden.
 sidebar:
     order: 100
 ---
 
-import Figure from '@components/Figure.astro';
-import YouTube from '@components/YouTube.astro';
+Kursen mvc är den andra kursen i backend-sekvensen för utbildningsprogrammet (och kurspaketet) i webbprogrammering. Du bygger vidare på det du lärt dig i node-kursen — JavaScript, Express, MongoDB, Docker och JWT — men nu skiftar vi språk till TypeScript och inför en professionell lagerarkitektur för koden.
 
-{/*
-<Figure 
-    src="https://dbwebb.se/image/webtec/logo.png"
-/>
-*/}
-
-Kursen Databasteknik, a.k.a. databas, lär ut teori och praktik i databasteknik med relationsdatabaser och SQL tillsammans med applikationsprogrammering mot en databas.
-
-Vi börjar med att installera en databas och komma igång med grunderna hur man jobbar mot en databas från terminalen och från desktop-verktyg.
-
-Därefter börjar vi modellera olika databaser och vi skapar dem med SQL. Databaserna fylls med data och vi använder frågespråket SQL för att ställa frågor mot datat.
-
-Näst steg blir att koppla en applikation mot databasen och där anvädner vi ett programmeringsspråk för att bygga applikationer som jobbar mot databasen.
-
-Vi fortsätter med att lära oss mer om relationsdatabaser och hur vi kan jobba mot dem.
+Kursen kretsar kring en och samma applikation under hela kursen: en **börsklientapp** mot en gemensam tokenbörsen. Du implementerar portföljhantering, orderläggning och handelshistorik, och mot slutet av kursen kopplar du upp dig mot en live-börs som alla studenter delar. Applikationen växer kursmoment för kursmoment — du lägger aldrig bort det du redan byggt.
 
 
 
-Innehåll
-------------------------
+## Vad du lär dig
 
-Kursen omfattar följande områden:
+Kursen täcker följande teknikområden:
 
-* Databasteknik med fokus på relationsmodellen.
+* **TypeScript** — statisk typning, Zod-validering och ESM-moduler i Node.js-miljö.
 
-* Modellering av databaser med ER-modellering (Entity-Relationship).
+* **Lagerarkitektur** — controllers, services och repositories som separata ansvarslager. Du refaktorerar din egen kod och mäter förbättringen med SonarQube.
 
-* SQL för att skapa, uppdatera, radera och fråga databasen samt sammanställa rapporter.
+* **Webbsäkerhet** — CORS, CSP, Helmet, rate limiting, CSRF och webhooks med HMAC-signering. Varje säkerhetsmoment börjar med en attack mot din egna app.
 
-* SQL med lagrade procedurer, funktioner och triggers.
+* **Testning** — enhetstester per lager med Vitest, integrationstester med Supertest och mongodb-memory-server, kodtäckning och kvalitetsgates.
 
-* Transaktioner i databas.
+* **Extern API-integration** — REST-anrop mot tokenbörsen, SSE för realtidsprisinformation och HMAC-signerade webhooks för orderbekräftelser.
 
-* Databasprestanda och index.
+* **Robusthet och driftsättning** — retry med exponentiell backoff, circuit breaker, strukturerad loggning med Pino och containerisering med Docker Compose.
 
-* Programmering av terminalbaserade applikationer för databaser, med objektorienterade programmeringstekniker.
 
-* Verktyg och tekniker som används vid utveckling av databaser och applikationer mot databaser.
+
+## Hur kursen är upplagd
+
+Kursen är designad med ett par pedagogiska principer som styr upplägget.
+
+**Oren kod först — refaktorering sedan.** I kmom01 skriver du medvetet logik direkt i route-handlers, utan lagerarkitektur. Det är inte ett misstag — det är avsikten. I kmom02 refaktorerar du samma kod till en renare arkitektur och kör SonarQube-scan före och efter. Förbättringen i faktiska siffror är det starkaste argumentet för lagerarkitektur.
+
+**Attack-first i säkerhetsmomenten.** Varje säkerhetsissue i kmom03 börjar med att du demonstrerar attacken mot din egna app — XSS, CSRF, clickjacking eller liknande — innan du implementerar skyddet. Du förstår hotet innan du väljer motåtgärd.
+
+**En app, en börs, alla studenter.** Från kmom05 handlar du mot en gemensam tokenbörsen. Alla studenter ser varandras prisrörelser via SSE, och det finns ett leaderboard. Det är ett gemensamt system att förhålla sig till, inte en lokal mock.
+
+**En sammanhängande kvalitetskedja.** Kursen bygger upp en kedja av kvalitetsverktyg steg för steg: SonarLint i editorn (kmom02) → SonarQube on-demand (kmom01+) → sonar-scanner i pre-push hook (kmom04) → ESLint och kodtäckning i CI (kmom04). Du ser hur varje lager i kedjan fångar olika typer av problem.
+
+**Projektet är applikationen.** I kmom10 bygger du en trading bot som använder SSE-prisflödet för att automatiskt lägga ordrar baserat på en strategi du väljer och implementerar. Det är ingen separat projektuppgift — det är nästa feature i appen du redan byggt.
