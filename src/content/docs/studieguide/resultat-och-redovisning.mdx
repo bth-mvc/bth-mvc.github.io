@@ -25,38 +25,18 @@ Kan du koppla och jämföra (reflektera) dina lärdomar från nuvarande kursmome
 
 ## Tagga och pusha ditt repo
 
-Lägg till en tagg till ditt repo och pusha sedan både taggen och ditt repo.
+Varje kursmoment lämnas in genom att committa, tagga och pusha till GitHub.
 
-Du kan använda följande versioner för dina taggar.
-
-| Version | Kmom   |
-|---------|--------|
-| v1.0.0   | kmom01 |
-| v2.0.0   | kmom02 |
-| v3.0.0   | kmom03 |
-| v4.0.0   | kmom04 |
-| v5.0.0   | kmom05 |
-| v6.0.0   | kmom06 |
-| v7.0.0   | kmom10 |
-
-Tagga ditt repo så här.
-
-```bash title="Lägg till en tagg på ditt repo med versionsnummer."
-git tag -a v1.0.0 -m "Ready with kmom01"
+```bash title="Committa, tagga och pusha (exempel för kmom01)."
+git add report/kmom01.md
+git commit -m "Add kmom01 report"
+git tag kmom01
+git push origin main --tags
 ```
 
-Om du gör ändringar så taggar du din nya inlämning med ett högre versionsnummer, till exempel 1.0.1 eller 1.1.0, du kan själv bestämma vilken version som känns lämplig.
+Taggarna följer mönstret `kmom01`, `kmom02`, ..., `kmom10`. Byt ut kursmomentet mot det du lämnar in.
 
-Nu kan du pusha både tagg och repo till GitHub.
-
-```bash title="Pusha repo inklusive taggar."
-git push
-git push --tags
-```
-
-I framtiden kommer du (troligen) att använda versionsnummer enligt något som heter "[Semantic versioning](https://semver.org/)", kika gärna på hur det fungerar.
-
-Som ett sista steg i din inlämning så kan du kontrollera att GitHub verkligen innehåller den allra senaste versionen av din kod.
+Som ett sista steg kan du kontrollera att GitHub verkligen innehåller den allra senaste versionen av din kod och att taggen syns under "Tags" i ditt repo.
 
 
 
@@ -81,8 +61,6 @@ När du lämnar in kommer det att köras ett antal automatiserade tester. Dessa 
 Du kan se status för körningen i GitHub Actions för ditt repo och du kan se senaste statusen i den badge som ligger överst i din README i ditt repo.
 
 Du kan själv provköra och se samma resultat som rättaren ser. Det är en mycket god idé att alltid testköra sin inlämning på samma sätt som rättaren gör. Du sparar tid genom att själv upptäcka eventuella slarvfel.
-
-[Läs mer om hur du själv kan köra testerna på ditt repo](../automatiserade-tester).
 
 
 
