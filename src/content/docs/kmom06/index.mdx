@@ -30,7 +30,6 @@ Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utök
 |---|---|---|
 | 06-55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) |
 | 06-60 | `portfolio-analytics` | Beräkna avkastning per token, bäst/sämst presterande, total portföljutveckling |
-| 06-65 | `circuit-breaker` | Enkel circuit breaker: sluta anropa börsen temporärt efter upprepade fel, återförsök efter timeout |
 
 ## Föreläsningar
 
@@ -167,6 +166,10 @@ Quizen nämner circuit breaker men det är inte en egen issue längre. Ändra fr
 ### Öppna frågor
 
 - Ska graceful shutdown vara ett eget issue? Det är viktigt (stäng SSE-anslutningar ordentligt vid `SIGTERM`) men kan också vara en del av issue 06-40 (logging/robusthet).
-- Ska portfolio-analytics (valfritt 06-45) kopplas mot en ny vy i Svelte-frontenden?
+
+### Lösta frågor
+
+- ~~Ska portfolio-analytics kopplas mot en ny vy i Svelte-frontenden?~~ Ja — implementerat som stats-sektion på Portfolio-sidan (06-60).
+- ~~Circuit breaker som valfri issue?~~ Borttagen (2026-06-25). Retry med backoff (06-20) täcker samma behov. Noterat i outside-scope.mdx.
 
 </details>

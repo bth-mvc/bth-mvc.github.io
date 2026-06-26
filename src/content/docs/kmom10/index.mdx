@@ -40,63 +40,71 @@ Gå igenom listan och bekräfta att varje del fungerar:
 | Retry-logik mot börsen är aktiv | 06 |
 | Prisnotifieringar fungerar via SSE | 06 |
 | Strukturerad loggning — känslig data loggas inte | 06 |
+| Ansluten till live-börsen med leaderboard | 06 |
 
-### Utöka börsklientappen
+### Trading bot
 
-Under kmom05 och kmom06 fanns valfria issues som du kunde göra om du ville utforska vidare. Nu blir de värdefulla — implementera minst **två** av dem som en del av grundkravet.
+Implementera en konfigurerbar trading bot — en bakgrundstjänst som bevakar prisflödet och lägger ordrar automatiskt när priströsklar korsas.
 
-Har du redan gjort dem under kursens gång? Då räknas de — verifiera att de fungerar och beskriv dem i redovisningstexten.
+Se **issue 10-10** för krav, endpoints, och steg-för-steg-approach. Boten berör alla lager i arkitekturen: model, repository, service, controller, route och SSE-hook. Det är din första feature utan guidad kod — du designar schemat och skriver implementationen själv.
 
-| Issue | Namn | Vad du bygger | Synligt i klienten |
-|---|---|---|---|
-| 05-65 | `trade-history` | `GET /api/trades` med cursor-pagination, handelshistorik | Trades-sidan låses upp |
-| 06-55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) | Orders-sidan utökas med lista |
-| 06-60 | `portfolio-analytics` | `GET /api/me/stats` — avkastning per token, handelsvolym, bäst/sämst presterande | Ny sektion på Portfolio-sidan |
+Frontenden har redan en **Trading Bots**-sida redo. Den låses upp när du lägger till `GET /api/bot` i `/api/doc`. API-dokumentationen visar dina bot-endpoints under "Examination".
 
-Varje utökning som exponerar en ny endpoint ska läggas till i `/api/doc` så att frontenden låser upp motsvarande vy. Studenter som redan gjort en valfri issue under kursen har den redo — läraren ser det direkt i frontenden.
+För trading boten, besvara följande i redovisningstexten:
 
-Beskriv implementationen och dina designbeslut i redovisningstexten.
+- Hur du designade bot-schemat — vilka fält och varför
+- Hur boten avgör när den ska handla — din strategilogik
+- Om boten handlar en gång per tröskel eller upprepade gånger — och varför du valde det
+- Hur du testade att boten fungerar
+- Vad du skulle förbättra om du hade mer tid
 
 ---
 
 ## Optionella krav — betyg C, B och A
 
-Varje krav höjer betyget ett steg. Krav 1 och krav 2 är fristående. Krav 3 kräver att båda är avklarade. Beskriv vad du gjort och varför i redovisningstexten.
+Varje krav höjer betyget ett steg. Kraven är fristående från varandra. Beskriv vad du gjort och varför i redovisningstexten.
 
-### Krav 1 — Testning (betyg C)
+### Krav 1 — Avancerad bot-strategi (betyg C)
 
-Skriv tester för de utökningar du implementerade i grundkravet:
+Bygg ut din trading bot med en mer sofistikerad strategi. Listan nedan är inspiration, inte en begränsning — har du en annan idé, beskriv strategin och implementera den, det räknas lika.
 
-- Enhetstester för services med mockade repositories
-- Integrationstester för controllers med Supertest + `mongodb-memory-server`
-- Minst 70% radtäckning på service-lagret
-- Testerna körs i CI utan beroende av extern databas
+- **Glidande medelvärde** — håll koll på de senaste N priserna och köp när priset sjunker under snittet, sälj när det stiger över
+- **Cooldown** — vänta N sekunder efter en order innan boten får handla igen (förhindrar orderrus)
+- **Max position** — köp inte om du redan äger mer än X av en token
+- **Stop-loss** — sälj automatiskt om priset faller ett visst belopp under referenspriset (skyddar mot stora förluster)
+- **Take-profit** — stäng positionen automatiskt när du nått en målvinst
+- **Dollar-cost averaging** — köp för ett fast belopp med jämna tidsintervall, oavsett pris
+- **Portföljrebalansering** — håll en målvikt per token och handla när vikten avviker
+- **Prestandauppföljning** — logga varje bot-trade och beräkna total vinst/förlust
+- **Flera strategier** — låt användaren välja strategi vid konfiguration (t.ex. tröskel eller glidande medelvärde)
 
-Beskriv vad du testade, varför du valde just de fallen och vad du *inte* testade och varför.
+Motivera ditt val och beskriv implementationen i redovisningstexten. Leaderboarden visar resultatet — koden visar hantverket.
 
-### Krav 2 — Kodkvalitet och CI (betyg B)
+### Krav 2 — Valfria issues (betyg B)
+
+Under kmom05 och kmom06 fanns valfria issues. Implementera minst **två** av dem:
+
+| Issue | Namn | Vad du bygger | Synligt i klienten |
+|---|---|---|---|
+| 05-65 | `trade-history` | `GET /api/trades` med cursor-pagination, handelshistorik | Trades-sidan låses upp |
+| 06-55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) | Orders-sidan utökas med lista |
+| 06-60 | `portfolio-analytics` | `GET /api/portfolio/stats` — avkastning per token, handelsvolym, bäst/sämst presterande | Ny sektion på Portfolio-sidan |
+
+Har du redan gjort dem under kursens gång? Då räknas de — verifiera att de fungerar och beskriv dem i redovisningstexten. Varje ny endpoint ska läggas till i `/api/doc`.
+
+### Krav 3 — Kodkvalitet (betyg A)
 
 - ESLint med regler för `max-lines-per-function` och `complexity`
-- Coverage-rapport i CI med definierad gräns
-- Pre-push hook med sonar-scanner — quality gate blockerar push vid nya code smells
-- Beskriv vilka kvalitetsproblem verktygen hittade och hur du hanterade dem
+- Tester för din trading bot: enhetstester för service med mockad repository, integrationstester med Supertest
+- Coverage-rapport synlig i SonarQube — ingen fast gräns, men du ska kunna motivera täckningsgraden
+- SonarQube-scan av din kod — noll nya blockers eller critical issues
 
-### Krav 3 — Eget val (betyg A)
+Dokumentera kvalitetsarbetet i redovisningstexten:
 
-Kräver att krav 1 och krav 2 är avklarade.
-
-Välj och implementera en backend-feature som inte ingår i grundkraven eller de optionella issuerna. Valet ska motiveras och implementationen ska dokumenteras.
-
-**Inspiration — inte en begränsad lista:**
-
-| Idé | Vad det innebär |
-|---|---|
-| Refresh tokens | Token rotation, secure storage, revocation |
-| Caching | HTTP cache-headers (ETag, Cache-Control) på tunga GET-endpoints |
-| Avancerad sökning | Fulltextsökning i MongoDB, relevansordning |
-| Webhooks ut | Din server *skickar* webhooks till en registrerad URL när något händer |
-| Avancerat CI | Branch protection, automatisk deploy, contract testing med Bruno |
-| Orderhantering | Avbryt pending order, spåra orderstatus (pending/matched/cancelled) |
+- Vilka problem hittade verktygen (ESLint, SonarQube)?
+- Vad ändrade du — och hur?
+- Vad valde du att inte åtgärda, och varför?
+- Vilka delar av boten valde du att testa och varför? Hur påverkade testerna den totala täckningen som den visas i SonarQube?
 
 ## Redovisning
 
@@ -145,31 +153,4 @@ Läraren läser din redovisningstext via `report/kmom10.md` i PR:en och bedömer
 
 
 
-## Kommentarer & Noteringar
-
-<details>
-<summary>Planeringsanteckningar för läraren</summary>
-
-### Krav 1–3 — ännu ej beslutade (2026-06-24)
-
-Grundkraven (checklista + 2 valfria issues) är klara. Krav 1–3 behöver omarbetas. Riktning:
-
-**Kodkvalitet som krav** — SonarCloud/SonarQube, ESLint-regler, coverage. Testning bör vara en del av kvalitetskravet, inte fristående ("skriv tester för din feature" istället för "skriv tester").
-
-**Egen feature med alla lager** — studenten har hittills följt guidade issues utan att skriva egen kod från scratch. Kmom10 bör kräva att de implementerar en ny feature som rör alla lager (model → repository → service → controller → route). Problemet med "eget val" är att språnget kan vara för stort. Bättre med ett definierat mål.
-
-**Robot-handel som feature** — studenten implementerar en enkel trading bot:
-- Lyssnar på SSE-prisflödet
-- Analyserar priser med en enkel strategi (t.ex. köp vid 5% dip, sälj vid 5% stigning)
-- Lägger ordrar automatiskt via exchange API
-- Kräver alla lager: model (strategi/config), service (logik), client (orders), SSE (priser)
-- Naturligt motiverande: leaderboarden visar vem som handlar bäst
-- Scope styrs av ambitionsnivå: enkel threshold-bot (C) vs avancerad strategi (A)
-
-**Vad som behöver bestämmas:**
-- Exakt betygskoppling krav 1–3
-- Om robot-handel ersätter "eget val" eller är ett alternativ
-- Hur man bedömer bot-kvalitet (kod, inte avkastning)
-
-</details>
 
