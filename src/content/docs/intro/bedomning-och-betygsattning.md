@@ -1,5 +1,5 @@
 ---
-title: Bedömning och betygsättning ⚠️
+title: Bedömning och betygsättning
 description: Hur sätts kursens betyg.
 sidebar:
     order: 150
@@ -61,15 +61,13 @@ Följande tabell används vid bedömning av projektet.
 
 | Bedömningspunkt | Poäng |
 |-----------------|:-----:|
+| Grundkrav är implementerat och fungerar felfritt. | 30 |
 | Krav 1 är implementerat och fungerar felfritt. | 10 |
 | Krav 2 är implementerat och fungerar felfritt. | 10 |
 | Krav 3 är implementerat och fungerar felfritt. | 10 |
-| Krav 4 är implementerat och fungerar felfritt. | 10 |
-| Krav 5 är implementerat och fungerar felfritt. | 10 |
-| Krav 6 är implementerat och fungerar felfritt. | 10 |
 | TOTALT | 60 |
 
-För ett godkänt betyg krävs minst 30 poäng samt att de obligatoriska kraven 1-3 är implementerade.
+För ett godkänt betyg krävs minst 30 poäng samt att grundkravet är implementerat.
 
 
 

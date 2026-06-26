@@ -1,5 +1,5 @@
 ---
-title: Studieplanering och schema ⚠️
+title: Studieplanering och schema
 description: Detaljer om schema, rekommenderad studieplanering och lektionsplan.
 sidebar:
     order: 130
