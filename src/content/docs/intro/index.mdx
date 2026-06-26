@@ -42,3 +42,15 @@ Kursen är designad med ett par pedagogiska principer som styr upplägget.
 **En sammanhängande kvalitetskedja.** Kursen bygger upp en kedja av kvalitetsverktyg steg för steg: SonarLint i editorn (kmom02) → SonarQube on-demand (kmom01+) → sonar-scanner i pre-push hook (kmom04) → ESLint och kodtäckning i CI (kmom04). Du ser hur varje lager i kedjan fångar olika typer av problem.
 
 **Projektet är applikationen.** I kmom10 bygger du en trading bot som använder SSE-prisflödet för att automatiskt lägga ordrar baserat på en strategi du väljer och implementerar. Det är ingen separat projektuppgift — det är nästa feature i appen du redan byggt.
+
+
+
+## Hur du arbetar
+
+Kursen följer ett issue-drivet arbetsflöde. Varje kursmoment är uppdelat i numrerade issues på GitHub — du arbetar igenom dem i ordning, ett i taget. Ett issue beskriver vad som ska göras, ger dig kontext och visar ibland ett kodfragment att utgå ifrån.
+
+En stor del av arbetet handlar om att **läsa och förstå kod**, snarare än att skriva den från grunden. Skelettet du får med dig har redan en del kod på plats — auth-flödet, felhantering, loggning — som du ska läsa, förstå och sedan använda som mönster när du bygger vidare. Issues visar dig en del lösningar direkt; din uppgift är att förstå *varför* de ser ut som de gör.
+
+Det är en medveten design. I verklig backendutveckling är majoriteten av arbetet att läsa befintlig kod, förstå systemet och lägga till rätt sak på rätt ställe. Kursen tränar den förmågan.
+
+I kmom10 förändras det. Där designar och implementerar du trading-boten självständigt — utan issues som guidar varje steg. Allt du lärt dig och förstått under kursen är det du har att utgå ifrån.
