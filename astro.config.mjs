@@ -98,11 +98,6 @@ export default defineConfig({
 						{ label: 'Example Guide', slug: 'guides/example' },
 					],*/
 				},
-				{
-					label: 'Övrigt',
-					collapsed: true,
-					items: [{ autogenerate: { directory: 'ovrigt' } }],
-				},
 			],
 		}),
 	],
