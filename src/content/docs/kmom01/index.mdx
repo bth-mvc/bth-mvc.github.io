@@ -111,14 +111,17 @@ npm run check
 
 Alla kontroller ska passera — typecheck, lint, format och tester. Åtgärda eventuella fel innan du går vidare.
 
-4. Committa, tagga och pusha:
+4. (Valfritt) Kör en självkoll: `npm run check-submission -- kmom01` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda.
+5. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom01.md
 git commit -m "Add kmom01 report"
-git tag kmom01
+git tag v1.0.0
 git push origin main --tags
 ```
+
+Behöver du uppdatera din inlämning efteråt? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v1.0.1`.
 
 
 

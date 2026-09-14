@@ -30,11 +30,13 @@ Varje kursmoment lämnas in genom att committa, tagga och pusha till GitHub.
 ```bash title="Committa, tagga och pusha (exempel för kmom01)."
 git add report/kmom01.md
 git commit -m "Add kmom01 report"
-git tag kmom01
+git tag v1.0.0
 git push origin main --tags
 ```
 
-Taggarna följer mönstret `kmom01`, `kmom02`, ..., `kmom10`. Byt ut kursmomentet mot det du lämnar in.
+Taggarna följer semver-mönstret `v1.0.0`, `v2.0.0`, ..., `v10.0.0` — versionens major-siffra är kursmomentets nummer. Byt ut kursmomentet mot det du lämnar in.
+
+Behöver du uppdatera en inlämning efteråt (komplettering)? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v1.0.1`.
 
 Som ett sista steg kan du kontrollera att GitHub verkligen innehåller den allra senaste versionen av din kod och att taggen syns under "Tags" i ditt repo.
 
@@ -43,6 +45,8 @@ Som ett sista steg kan du kontrollera att GitHub verkligen innehåller den allra
 ## Självtest
 
 Gör ett självtest och dubbelkolla att du uppfyllt alla krav i kursmomentet. Den vanligaste anledningen till komplettering är att man missat någon liten del. Gör en egen genomgång innan du lämnar in — det sparar tid. Dessutom vill man alltid göra en perfekt inlämning, eller hur?
+
+Du kan köra `npm run check-submission -- kmomXX` (byt `XX` mot ditt kursmoment) som en snabb självkoll — den kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda.
 
 Missa inte att köra hela kvalitetssviten.
 
@@ -78,9 +82,9 @@ Det sker ingen betygsättning, bedömning eller återkoppling när du är klar o
 
 
 
-## Pull request (PR) för kmom03, kmom06, kmom10
+## Pull request (PR) för kmom06 och kmom10
 
-I samband med att du lämnar in kmom03, kmom06 och kmom10 skall du även göra en pull request (PR) på GitHub för att visa att du gör din inlämning.
+I samband med att du lämnar in kmom06 och kmom10 skall du även göra en pull request (PR) på GitHub för att visa att du gör din inlämning.
 
 Följ instruktionen i [Gör en Pull Request (PR)](../gor-en-pr/) för att skapa din PR.
 

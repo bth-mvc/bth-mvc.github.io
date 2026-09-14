@@ -84,16 +84,19 @@ Skriv din redovisningstext i `report/kmom06.md` i ditt repo. Frågorna nedan är
 1. Kör `npm run sonar` och jämför med din kmom05-scan. Notera förändringar i din redovisningstext.
 2. Stäng de GitHub-issues som du har löst klart.
 3. Skriv klart din redovisningstext i `report/kmom06.md`.
-4. Committa, tagga och pusha:
+4. (Valfritt) Kör en självkoll: `npm run check-submission -- kmom06` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda.
+5. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom06.md
 git commit -m "Add kmom06 report"
-git tag kmom06
+git tag v6.0.0
 git push origin main --tags
 ```
 
-4. Öppna en pull request från `main` till `bth/submit/kmom06` i ditt repo.
+Behöver du uppdatera din inlämning efteråt? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v6.0.1`.
+
+6. Öppna en pull request från `main` till `bth/submit/kmom06` i ditt repo.
 
 Läraren läser din redovisningstext via `report/kmom06.md` i PR:en.
 

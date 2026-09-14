@@ -92,14 +92,17 @@ Skriv din redovisningstext i `report/kmom03.md` i ditt repo. Frågorna nedan är
 1. Kör `npm run sonar` och jämför med din kmom02-scan. Notera förändringar i din redovisningstext.
 2. Stäng de GitHub-issues som du har löst klart.
 3. Skriv klart din redovisningstext i `report/kmom03.md`.
-4. Committa, tagga och pusha:
+4. (Valfritt) Kör en självkoll: `npm run check-submission -- kmom03` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda.
+5. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom03.md
 git commit -m "Add kmom03 report"
-git tag kmom03
+git tag v3.0.0
 git push origin main --tags
 ```
+
+Behöver du uppdatera din inlämning efteråt? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v3.0.1`.
 
 
 
