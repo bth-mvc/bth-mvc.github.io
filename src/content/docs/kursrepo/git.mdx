@@ -1,8 +1,9 @@
 ---
-title: "Jobba med Git ⚠️" 
+title: "Jobba med Git" 
 description: Vi tittar på ett antal av de grundläggande kommandona i Git.
 author: mos
 revision:
+    "2026-09-14": "(C, mos) Lägg till git tag inför inlämning av kmom."
     "2026-06-11": "(B, mos) Bygg om för ny struktur med kursrepo."
     "2025-06-25": "(A, mos) Första utkastet."
 sidebar:
@@ -18,10 +19,7 @@ import YouTube from '@components/YouTube.astro';
 
 Ditt kursrepo är ett git repo och de filer du skapar behöver du också lägga till i git repot via de kommandon som git erbjuder.
 
-
-:::danger
-Denna artikel behöver skrivas om nu när studenten får sitt kursrepo och ge en introduktion till de git-kommandon som behövs innan inlämningen av kmom01.
-:::
+Här går vi igenom de vardagliga kommandona (`status`, `add`, `commit`, `push`, `pull`, `log`) och avslutar med `git tag`, som du behöver använda varje gång du gör en inlämning.
 
 ## git status
 
@@ -205,3 +203,35 @@ import git8 from '@assets/kursrepo-utvecklingsmiljo/git8.png';
 Nu räcker det alltså om du i fortsättningen skriver `git lg` för att se den formatterade varianten av git commit historik.
 
 Nu i början är det kanske inte så intressant att titta i historiken, men ju mer du använder git och ju mer erfaren du blir så kan det också bli allt viktigare att ha koll på hur din commit historik ser ut.
+
+
+
+## git tag
+
+När du gör en inlämning i kursen räcker det inte med `git commit` och `git push`, du behöver också **tagga** den commit som ska bedömas. En tagg är ett namngivet märke på en specifik commit och det är taggen läraren letar efter när ett kmom ska rättas.
+
+Kursen använder [semantisk versionering](https://semver.org/lang/sv/) för taggarna, där versionens första siffra motsvarar kmomets nummer. Din första inlämning för kmom01 taggas alltså `v1.0.0`, kmom02 taggas `v2.0.0` och så vidare.
+
+```console title="Tagga senaste commiten för kmom01 och pusha taggen till GitHub."
+git tag v1.0.0
+git push origin main --tags
+```
+
+Notera flaggan `--tags` i `git push`, utan den skickas bara dina commits men inte själva taggen till GitHub.
+
+Behöver du rätta något och lämna in på nytt, till exempel efter feedback från läraren, så gör du en ny commit och taggar om med en ökad patch-version.
+
+```console title="Uppdatera en inlämning genom att tagga om med en ny patch-version."
+git add .
+git commit -m "Fix issues found in review"
+git tag v1.0.1
+git push origin main --tags
+```
+
+Du kan se samtliga taggar i ditt repo med kommandot `git tag`.
+
+```console title="Lista samtliga taggar i repot."
+git tag
+```
+
+Läs mer om vilken tagg som gäller för respektive kmom i beskrivningen för det kmomet.
