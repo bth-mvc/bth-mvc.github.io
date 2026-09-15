@@ -22,7 +22,7 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 | 04-20 | `integration-tests` | Integrationstester för controllers med Supertest + `mongodb-memory-server` |
 | 04-30 | `ci-quality` | CI-pipeline: lint + test + coverage-gräns (70% på services) |
 | 04-40 | `eslint-rules` | ESLint-regler för `max-lines-per-function` och `complexity` |
-| 04-50 | `quality-gate` | Pre-push hook med sonar-scanner mot lokal SonarQube — blockerar push om quality gate inte passerar |
+| 04-50 | `quality-gate` | Pre-push hook med sonar-scanner mot lokal SonarQube — informativ scan, blockerar inte push |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
@@ -155,10 +155,10 @@ npm run sonar:ci
 
 ```bash
 # package.json
-"sonar:ci": "sonar-scanner -Dsonar.qualitygate.wait=true"
+"sonar:ci": "node --env-file=.env node_modules/sonarqube-scanner/bin/sonar-scanner.js"
 ```
 
-`sonar.qualitygate.wait=true` gör att `sonar-scanner` väntar på SonarQubes svar och returnerar exit code 1 om quality gate inte passerar. Pushen blockeras.
+`sonar:ci` kör bara scanningen, utan `-Dsonar.qualitygate.wait=true` — pushen blockeras alltså inte om quality gate failar. Resultatet är informativt: studenten ser det i SonarQube-UI:t efteråt, samma resonemang som pre-push (inte pre-commit) i föregående stycke — friktion ska komma från `npm run check`, inte från ett externt verktyg som kan vara nere eller ge falska positiva.
 
 **Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. SonarLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
 
