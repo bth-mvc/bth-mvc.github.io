@@ -1,11 +1,17 @@
 ---
-title: Versioner av kursen ⚠️
+title: Versioner av kursen
 description: Historiska versioner av kurs och kursmaterial.
+sidebar:
+    order: 9300
 ---
 
+Första gången som denna kursen går är hösten 2026.
+
+Det finns föregångare i form av [Kursen mvc (v2)](https://dbwebb.se/kurser/mvc-v2) men det är bara en lös koppling.
+
+<!--
+
 Om du påbörjat den äldre version av kursen så skall du också slutföra denna versionen av kursen eller göra om den nya kursen från start. Alternativt rådgör du med den som är kursansvarig.
-
-
 
 ## Äldre versioner av kursmaterial
 
@@ -14,8 +20,6 @@ Från vårterminen 2022 till och med våren 2025 användes kursen [databas versi
 Från vårterminen 2018 till och med våren 2021 användes kursen [databas version 1](http://dbwebb.se/kurser/databas-v1).
 
 Undet vårterminen 2017 gavs kursen [dbjs version 1](https://dbwebb.se/kurser/dbjs-v1).
-
-
 
 ## Äldre versioner av kursplan
 
@@ -30,3 +34,5 @@ För programmet Software Engineering heter kursen "DV1605 Webbprogrammering och 
 Kursens namn är "PA1451 Databasteknologier för webben" för programmet Webbprogrammering och kurspaketet webprog (från VT18).
 
 Kursens namn är "PA1444 Webbprogrammering och databaser" till programmen Software Engineering och International Software Engieering (från VT17).
+
+-->

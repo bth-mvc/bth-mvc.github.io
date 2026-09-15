@@ -1,8 +1,8 @@
 /* Dark mode colors. */
 :root {
 	--sl-color-accent-low: #072d00;
-	--sl-color-accent: #247f00;
-	--sl-color-accent-high: #aad7a0;
+	--sl-color-accent: #5f007f;
+	--sl-color-accent-high: #cca0d7;
 	--sl-color-white: #ffffff;
 	--sl-color-gray-1: #eaf0e8;
 	--sl-color-gray-2: #bdc4bb;
@@ -12,11 +12,32 @@
 	--sl-color-gray-6: #1f2a1c;
 	--sl-color-black: #151a13;
 }
+/* Make top-level direct sidebar links look like nested file links */
+ul.top-level > li > a.large {
+	font-size: var(--sl-text-sm);
+	font-weight: normal;
+	color: var(--sl-color-gray-2);
+}
+
+/* Active top-level sidebar link: override the .large rule above */
+:root[data-theme='dark'] ul.top-level > li > a.large[aria-current='page'],
+:root[data-theme='dark'] ul.top-level > li > a.large[aria-current='page']:hover,
+:root[data-theme='dark'] ul.top-level > li > a.large[aria-current='page']:focus {
+	color: #000;
+}
+:root[data-theme='light'] ul.top-level > li > a.large[aria-current='page'],
+:root[data-theme='light'] ul.top-level > li > a.large[aria-current='page']:hover,
+:root[data-theme='light'] ul.top-level > li > a.large[aria-current='page']:focus {
+	color: #fff;
+}
+
 /* Light mode colors. */
 :root[data-theme='light'] {
-	--sl-color-accent-low: #c0e2b8;
-	--sl-color-accent: #237b00;
-	--sl-color-accent-high: #0d3e00;
+	--sl-color-accent-low: #ddb8e2;
+	/* --sl-color-accent: #237b00;
+	--sl-color-accent-high: #0d3e00; */
+  --sl-color-accent: #5f007f;
+	--sl-color-accent-high: #cca0d7;
 	--sl-color-white: #151a13;
 	--sl-color-gray-1: #1f2a1c;
 	--sl-color-gray-2: #303c2d;

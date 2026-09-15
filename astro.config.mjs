@@ -43,65 +43,32 @@ export default defineConfig({
 				{
 					label: 'Introduktion',
 					collapsed: true,
-					autogenerate: { directory: 'intro' },
+					items: [{ autogenerate: { directory: 'intro' } }],
 				},
-				{ 
+				{
 					label: 'Labbmiljö',
 					collapsed: true,
-					autogenerate: { directory: 'labbmiljo' },
+					items: [{ autogenerate: { directory: 'labbmiljo' } }],
 				},
-				{ 
+				{
 					label: 'Kursrepo',
 					collapsed: true,
-					autogenerate: { directory: 'kursrepo' },
+					items: [{ autogenerate: { directory: 'kursrepo' } }],
 				},
-				{
-					label: 'Kmom01',
-					collapsed: true,
-					autogenerate: { directory: 'kmom01' },
-				},
-				{
-					label: 'Kmom02',
-					collapsed: true,
-					autogenerate: { directory: 'kmom02' },
-				},
-				{
-					label: 'Kmom03',
-					collapsed: true,
-					autogenerate: { directory: 'kmom03' },
-				},
-				{
-					label: 'Kmom04',
-					collapsed: true,
-					autogenerate: { directory: 'kmom04' },
-				},
-				{
-					label: 'Kmom05',
-					collapsed: true,
-					autogenerate: { directory: 'kmom05' },
-				},
-				{
-					label: 'Kmom06',
-					collapsed: true,
-					autogenerate: { directory: 'kmom06' },
-				},
-				{
-					label: 'Kmom10',
-					collapsed: true,
-					autogenerate: { directory: 'kmom10' },
-				},
+				{ slug: 'kmom01' },
+				{ slug: 'kmom02' },
+				{ slug: 'kmom03' },
+				{ slug: 'kmom04' },
+				{ slug: 'kmom05' },
+				{ slug: 'kmom06' },
+				{ slug: 'kmom10' },
 				{
 					label: 'Studieguide',
 					collapsed: true,
-					autogenerate: { directory: 'studieguide' },
+					items: [{ autogenerate: { directory: 'studieguide' } }],
 					/* items: [
 						{ label: 'Example Guide', slug: 'guides/example' },
 					],*/
-				},
-				{
-					label: 'Övrigt',
-					collapsed: true,
-					autogenerate: { directory: 'ovrigt' },
 				},
 			],
 		}),

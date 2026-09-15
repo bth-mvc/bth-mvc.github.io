@@ -111,14 +111,17 @@ Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Frågorna nedan är
 
 1. Stäng de GitHub-issues som du har löst klart.
 2. Skriv klart din redovisningstext i `report/kmom02.md`.
-3. Committa, tagga och pusha:
+3. (Valfritt) Kör en självkoll: `npm run check-submission -- kmom02` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda.
+4. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom02.md
 git commit -m "Add kmom02 report"
-git tag kmom02
+git tag v2.0.0
 git push origin main --tags
 ```
+
+Behöver du uppdatera din inlämning efteråt? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v2.0.1`.
 
 
 
