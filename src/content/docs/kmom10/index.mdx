@@ -12,35 +12,7 @@ Det examinerande kursmomentet. Du fördjupar och utökar börsklientappen som du
 
 ## Grundkrav — betyg E och D
 
-Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera enligt checklistan nedan. Sedan utökas appen med två konkreta nya features.
-
-### Verifiera att applikationen fungerar
-
-Gå igenom listan och bekräfta att varje del fungerar:
-
-| Funktionalitet | Kmom |
-|---|---|
-| `GET /health` returnerar `{ status: 'ok' }` | 01 |
-| Frontenden laddas och visar korrekt data | 01 |
-| Lagerarkitektur genomförd: controllers, services, repositories | 02 |
-| Zod-validering på alla inkommande requests | 02 |
-| Global error handler med custom error-klasser | 02 |
-| Publika IDs används i URL:er (ej MongoDB `_id`) | 02 |
-| CORS konfigurerat korrekt för Svelte-frontenden | 03 |
-| Helmet och rate limiting aktiva | 03 |
-| Inloggning, logout och skyddade routes fungerar | 03 |
-| Enhetstester för services körs gröna | 04 |
-| Integrationstester för controllers körs gröna | 04 |
-| CI-pipeline kör lint + test + coverage | 04 |
-| Pre-push hook blockerar vid SonarQube-fel | 04 |
-| API-nyckel konfigurerad mot tokenbörsen | 05 |
-| Köp/säljorder kan läggas och webhook tas emot | 05 |
-| SSE-flöde relay:as till frontenden | 05 |
-| Webhook-hantering är idempotent | 06 |
-| Retry-logik mot börsen är aktiv | 06 |
-| Prisnotifieringar fungerar via SSE | 06 |
-| Strukturerad loggning — känslig data loggas inte | 06 |
-| Ansluten till live-börsen med leaderboard | 06 |
+Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera. Verifiera hela flödet end-to-end (registrering → orderläggning → SSE-uppdatering → webhook → portfölj/leaderboard) — inte bara att varje enskild issue är stängd i isolation. Sedan utökas appen med två konkreta nya features.
 
 ### Trading bot
 
