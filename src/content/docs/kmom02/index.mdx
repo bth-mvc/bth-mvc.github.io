@@ -95,7 +95,7 @@ Quizen för kmom02 testar om du förstår ansvaret för varje lager i lagerarkit
 
 ## Redovisningstext
 
-Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Det är din egen reflektion över veckan, inte ett förhör. Bläddra gärna tillbaka genom veckans issues och föreläsningar för att påminna dig om vad du har gjort, och skriv sedan om det som fastnade: vad som var nytt, vad som var svårt och vad som klarnade längs vägen.
+Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Det är din egen reflektion över veckan, inte ett förhör. Bläddra gärna tillbaka genom veckans issues och föreläsningar för att påminna dig om vad du har gjort, och skriv sedan om det som fastnade: vad som var nytt, vad som var svårt och vad som klarnade längs vägen. Skriv på svenska eller engelska, ungefär en A4-sida.
 
 Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att komma igång. Du behöver inte ta upp alla, och du behöver inte följa ordningen — en sammanhängande text är bättre än svar på frågor.
 
@@ -109,8 +109,16 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 
 1. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
 2. Skriv klart din redovisningstext i `report/kmom02.md` och ta bort platshållartexten.
-3. Kör en självkoll: `npm run check-submission -- kmom02` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda. Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`). Annars hoppas den över, och då behöver du själv kontrollera att dina issues är stängda.
-4. Committa, tagga och pusha:
+3. Verifiera att koden är ren innan du taggar:
+
+```bash
+npm run check
+```
+
+Alla kontroller ska passera — typecheck, lint, format och tester. Åtgärda eventuella fel innan du går vidare. Samma kontroller körs i CI, så här fångar du felen först.
+
+4. Kör en självkoll: `npm run check-submission -- kmom02` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda. Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`). Annars hoppas den över, och då behöver du själv kontrollera att dina issues är stängda.
+5. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom02.md
