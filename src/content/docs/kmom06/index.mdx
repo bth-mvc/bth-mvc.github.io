@@ -72,17 +72,14 @@ Quizen för kmom06 testar om du förstår vad idempotens är och varför det beh
 
 ## Redovisningstext
 
-Skriv din redovisningstext i `report/kmom06.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
+Skriv din redovisningstext i `report/kmom06.md` i ditt repo. Det är din egen reflektion över veckan, inte ett förhör. Bläddra gärna tillbaka genom veckans issues och föreläsningar för att påminna dig om vad du har gjort, och skriv sedan om det som fastnade: vad som var nytt, vad som var svårt och vad som klarnade längs vägen.
 
-1. Vad är idempotens och varför är det viktigt för webhook-hantering? Hur implementerade du det?
+Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att komma igång. Du behöver inte ta upp alla, och du behöver inte följa ordningen — en sammanhängande text är bättre än svar på frågor.
 
-2. Beskriv din retry-logik. Vad händer om börsen returnerar 429 tre gånger i rad?
-
-3. Hur fungerar din prisnotifieringstjänst? Vad händer i kedjan från att börsen skickar ett pris till att användaren ser notisen?
-
-4. Vad loggar du och vad loggar du *inte*? Motivera med ett konkret exempel från din kod.
-
-5. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
+- **Robusthet** — Vad kan gå fel i samspelet med börsen, och hur hanterar din app det?
+- **Prisnotifieringar** — Hur hänger kedjan ihop, från ett nytt pris till en notis hos användaren?
+- **Loggning** — Vad loggar du, vad låter du bli att logga, och varför?
+- Vad är din viktigaste insikt (TIL — Today I Learned) från veckan?
 
 ## Inlämning
 

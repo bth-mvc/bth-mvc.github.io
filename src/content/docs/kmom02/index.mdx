@@ -95,19 +95,15 @@ Quizen för kmom02 testar om du förstår ansvaret för varje lager i lagerarkit
 
 ## Redovisningstext
 
-Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
+Skriv din redovisningstext i `report/kmom02.md` i ditt repo. Det är din egen reflektion över veckan, inte ett förhör. Bläddra gärna tillbaka genom veckans issues och föreläsningar för att påminna dig om vad du har gjort, och skriv sedan om det som fastnade: vad som var nytt, vad som var svårt och vad som klarnade längs vägen.
 
-1. Beskriv skillnaden mellan controller, service och repository med ett konkret exempel från din kod. Vad ansvarar varje lager för?
+Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att komma igång. Du behöver inte ta upp alla, och du behöver inte följa ordningen — en sammanhängande text är bättre än svar på frågor.
 
-2. Hur fungerar din globala error handler? Vad händer med ett fel som kastas i ett repository?
-
-3. Varför valideras inkommande data i controller-lagret och inte i service-lagret?
-
-4. Du använde Zod i kmom01 för att validera miljövariabler. Vad är skillnaden mot att använda Zod för att validera en request body i en controller?
-
-5. Jämför din SonarQube-rapport från kmom01 med rapporten efter kmom02. Vad förändrades och varför?
-
-6. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
+- **Lagerarkitekturen** — Hur fördelade du ansvaret mellan controller, service och repository? Hur känns koden nu jämfört med innan refaktoreringen?
+- **Felhantering** — Hur tar sig ett fel genom lagren och blir ett svar till klienten?
+- **Validering** — Var kontrollerar du inkommande data, och hur skiljer det sig från att kontrollera miljövariabler?
+- Gjorde du den valfria SonarQube-jämförelsen — vad visade den?
+- Vad är din viktigaste insikt (TIL — Today I Learned) från veckan?
 
 ## Inlämning
 

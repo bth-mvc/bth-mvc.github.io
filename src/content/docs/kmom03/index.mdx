@@ -76,21 +76,15 @@ Quizen för kmom03 testar om du förstår vad XSS och CSRF är, hur same-origin 
 
 ## Redovisningstext
 
-Skriv din redovisningstext i `report/kmom03.md` i ditt repo. Frågorna nedan är en guide — du behöver inte besvara dem en i taget utan får gärna väva in dem i en sammanhängande text. Berätta om hur det kändes att jobba igenom kmomet, om du fick några aha-upplevelser längs vägen och om något var svårt eller förvirrande. Det är den reflektionen som gör redovisningstexten värdefull, inte bara att du listar att du gjort sakerna.
+Skriv din redovisningstext i `report/kmom03.md` i ditt repo. Det är din egen reflektion över veckan, inte ett förhör. Bläddra gärna tillbaka genom veckans issues och föreläsningar för att påminna dig om vad du har gjort, och skriv sedan om det som fastnade: vad som var nytt, vad som var svårt och vad som klarnade längs vägen.
 
-1. Beskriv XSS-attacken du demonstrerade. Vilka åtgärder implementerade du och vad skyddar varje åtgärd mot?
+Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att komma igång. Du behöver inte ta upp alla, och du behöver inte följa ordningen — en sammanhängande text är bättre än svar på frågor.
 
-2. Vad är CSRF och varför är httpOnly-cookies en attackyta? Hur löste du det?
-
-3. Förklara hur CORS fungerar. Vad är en preflight-request och vad händer om origin är wildcard med credentials?
-
-4. Välj två headers som Helmet lägger till och förklara vad de skyddar mot.
-
-5. Varför måste `PATCH /api/me/password` verifiera det nuvarande lösenordet, trots att användaren redan är inloggad?
-
-6. Vad är ett timing attack och varför är `bcrypt.compare()` säkert mot det? Vad händer om man jämför lösenord med `===` istället?
-
-7. Vad är din viktigaste insikt (TIL — Today I Learned) från det här kursmomentet?
+- **Attackerna** — Vilken attack gjorde störst intryck när du såg den fungera mot din egen app?
+- **Skydden** — Vilka skydd har du lagt till (till exempel Helmet, CORS, SameSite-cookies, rate limiting), och vad skyddar de mot?
+- **Lösenord** — Vad har du lärt dig om att hantera lösenord och lösenordsbyte på ett säkert sätt?
+- **Ditt sätt att tänka** — Har din syn på säkerhet förändrats? Vad tänker du på nu när du skriver kod?
+- Vad är din viktigaste insikt (TIL — Today I Learned) från veckan?
 
 ## Inlämning
 
