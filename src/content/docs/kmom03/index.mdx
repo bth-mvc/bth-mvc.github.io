@@ -18,21 +18,21 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 
 | Issue | Namn | Attack som demonstreras | Fix du implementerar |
 |---|---|---|---|
-| 03-10 | `xss` | Injicerat script via inmatningsfält renderas i UI:t | Content-Security-Policy via Helmet, sanitera lagrad input |
-| 03-20 | `csrf` | Förfalskad förfrågan från evil.html utnyttjar inloggad session | `SameSite=strict` på JWT-cookie, CSRF-token för mutationer |
-| 03-30 | `cors` | Wildcard CORS + credentials läcker data till annan origin | Explicit origin-lista, korrekt preflight-hantering |
-| 03-40 | `helmet` | Saknade säkerhetsheaders synliga i browser dev tools | Helmet med genomgång av vad varje header skyddar mot |
-| 03-50 | `rate-limiting` | Script hamrar login-endpointen utan begränsning | `express-rate-limit` på auth-routes |
-| 03-60 | `password-change` | Byt lösenord utan att känna till det gamla | `PATCH /api/me/password` — verifiera nuvarande lösenord |
-| 03-70 | `crypto` | bcrypt-hash i klartext i logg, lösenordsjämförelse med `===` | Korrekt bcrypt cost factor, timing-säker jämföring, rensa känslig data ur loggar |
+| 03‑10 | `xss` | Injicerat script via inmatningsfält renderas i UI:t | Content-Security-Policy via Helmet, sanitera lagrad input |
+| 03‑20 | `csrf` | Förfalskad förfrågan från evil.html utnyttjar inloggad session | `SameSite=strict` på JWT-cookie, CSRF-token för mutationer |
+| 03‑30 | `cors` | Wildcard CORS + credentials läcker data till annan origin | Explicit origin-lista, korrekt preflight-hantering |
+| 03‑40 | `helmet` | Saknade säkerhetsheaders synliga i browser dev tools | Helmet med genomgång av vad varje header skyddar mot |
+| 03‑50 | `rate-limiting` | Script hamrar login-endpointen utan begränsning | `express-rate-limit` på auth-routes |
+| 03‑60 | `password-change` | Byt lösenord utan att känna till det gamla | `PATCH /api/me/password` — verifiera nuvarande lösenord |
+| 03‑70 | `crypto` | bcrypt-hash i klartext i logg, lösenordsjämförelse med `===` | Korrekt bcrypt cost factor, timing-säker jämföring, rensa känslig data ur loggar |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 03-75 | `secure-logging` | Säker loggning med Pino — logga misslyckade inloggningar, filtrera bort känslig data |
-| 03-80 | `brute-force` | Räkna misslyckade inloggningsförsök, lås konto temporärt |
-| 03-85 | `refresh-tokens` | Refresh tokens + token rotation — ny token vid varje refresh |
+| 03‑75 | `secure-logging` | Säker loggning med Pino — logga misslyckade inloggningar, filtrera bort känslig data |
+| 03‑80 | `brute-force` | Räkna misslyckade inloggningsförsök, lås konto temporärt |
+| 03‑85 | `refresh-tokens` | Refresh tokens + token rotation — ny token vid varje refresh |
 
 ## Föreläsningar
 
