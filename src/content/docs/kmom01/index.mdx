@@ -132,6 +132,8 @@ git push origin main --tags
 
 Kontrollera på GitHub att taggen syns under **Tags**.
 
+Taggen startar ett CI-flöde på GitHub, under fliken **Actions**. Det kör samma kontroller som du körde lokalt, och bygger och startar dessutom appen och kör Bruno-testerna mot den. Vänta tills det är klart och kontrollera att det blir grönt. Blir det rött: öppna körningen, läs felet, åtgärda det och lämna in igen med en ny tagg (se nedan).
+
 Behöver du uppdatera din inlämning efteråt? Committa ändringen och skapa en ny tagg med ökad patch-version, t.ex. `v1.0.1`, och pusha den. Flytta aldrig en tagg som redan är pushad.
 
 
