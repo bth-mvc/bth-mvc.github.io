@@ -107,9 +107,9 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 
 ## Inlämning
 
-1. Stäng de GitHub-issues som du har löst klart.
-2. Skriv klart din redovisningstext i `report/kmom02.md`.
-3. Kör en självkoll: `npm run check-submission -- kmom02` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda. Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`), annars hoppas den över.
+1. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
+2. Skriv klart din redovisningstext i `report/kmom02.md` och ta bort platshållartexten.
+3. Kör en självkoll: `npm run check-submission -- kmom02` — kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda. Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`). Annars hoppas den över, och då behöver du själv kontrollera att dina issues är stängda.
 4. Committa, tagga och pusha:
 
 ```bash
@@ -119,7 +119,9 @@ git tag v2.0.0
 git push origin main --tags
 ```
 
-Behöver du uppdatera din inlämning efteråt? Committa ändringen och tagga om med en ökad patch-version, t.ex. `v2.0.1`.
+Kontrollera på GitHub att taggen syns under **Tags**.
+
+Behöver du uppdatera din inlämning efteråt? Committa ändringen och skapa en ny tagg med ökad patch-version, t.ex. `v2.0.1`, och pusha den. Flytta aldrig en tagg som redan är pushad.
 
 
 
