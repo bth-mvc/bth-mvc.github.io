@@ -30,14 +30,14 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 | Issue | Namn | Vad du gör |
 |---|---|---|
 | 01-10 | `getting-started` | Klona template-repot, förstå strukturen, starta MongoDB med `docker compose up -d mongodb` och kör `npm run dev` |
-| 01-15 | `quality` | Kör hela kvalitetskedjan — TypeScript, ESLint, Prettier, Vitest, SonarQube — förstå vad varje verktyg kontrollerar och etablera baseline-scan |
+| 01-15 | `quality` | Kör kvalitetskedjan — TypeScript, ESLint, Prettier, Vitest — och förstå vad varje verktyg kontrollerar (SonarQube-baseline valfritt) |
 | 01-20 | `typescript` | Läs och förstå tsconfig-konfigurationen och TypeScript-typerna som redan finns i koden, bygg och kör |
 | 01-30 | `express` | Utöka Express-servern i TypeScript, konfigurera `express.static()` och SPA-fallback för Svelte-appen |
-| 01-35 | `client-exploration` | Registrera ett konto, logga in och utforska frontenden — se vilka sektioner som är låsta och varför |
-| 01-40 | `docker` | Skriv Dockerfile för appen, koppla ihop med MongoDB i docker-compose.yml |
-| 01-50 | `rest` | Bygg de första domänspecifika REST-routes med TypeScript-typer, korrekta statuskoder |
-| 01-60 | `api-doc` | `GET /api/doc` — självbeskrivande endpoint som listar tillgängliga routes; frontenden använder den för att aktivera UI-sektioner |
-| 01-70 | `zod-env` | Validera miljövariabler med Zod vid uppstart — appen ska krascha med ett tydligt felmeddelande om något saknas |
+| 01-35 | `client-exploration` | Registrera ett konto, logga in och utforska frontenden — se vilka sektioner som är låsta |
+| 01-40 | `docker` | Skriv en Dockerfile med two-stage build, starta hela stacken med Docker Compose och lägg till databasstatus i `/health` |
+| 01-50 | `rest` | Bygg den första domänspecifika REST-routen, `GET /api/portfolio`, med TypeScript-typ, korrekt statuskod och inloggningskrav |
+| 01-60 | `api-doc` | `GET /api/doc` — självbeskrivande endpoint som listar dina routes; frontenden använder den för att låsa upp sektioner |
+| 01-70 | `zod-env` | Validera miljövariabler med Zod vid uppstart — appen ska stoppa med ett tydligt felmeddelande om något saknas eller är fel |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
@@ -51,11 +51,11 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. De ger den
 
 | Titel | Om |
 |---|---|
-| [Om kmom01 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom01-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
-| [TypeScript för JavaScript-utvecklare](https://bth-mvc.github.io/teacher/kmom01-1-typescript/slides.html) | Typer, interfaces, tsconfig, literal types, union types, optional fields, `import type` — vad som är nytt mot JS och de mönster som dyker upp i issues 01-20 och 01-50 |
-| [Docker Compose för Node.js-appar](https://bth-mvc.github.io/teacher/kmom01-2-docker-compose/slides.html) | Dockerfile, compose-fil, nätverk mellan containers |
-| [Express i TypeScript](https://bth-mvc.github.io/teacher/kmom01-3-express/slides.html) | Request/Response-typer, middleware-signaturer, `app.ts`/`index.ts`-split |
-| [Zod — schema-driven validering (intro)](https://bth-mvc.github.io/teacher/kmom01-4-zod/slides.html) | Varför schema-validering, `parse()` vs `safeParse()`, env-validering som första use case |
+| [About kmom01 — how the week fits together](https://bth-mvc.github.io/teacher/kmom01-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [TypeScript for JavaScript Developers](https://bth-mvc.github.io/teacher/kmom01-1-typescript/slides.html) | Typer, interfaces, tsconfig, literal types, union types, optional fields, `import type` — vad som är nytt mot JS och de mönster som dyker upp i issues 01-20 och 01-50 |
+| [Docker Compose for Node.js Apps](https://bth-mvc.github.io/teacher/kmom01-2-docker-compose/slides.html) | Dockerfile, compose-fil, nätverk mellan containers |
+| [Express in TypeScript](https://bth-mvc.github.io/teacher/kmom01-3-express/slides.html) | Request/Response-typer, middleware-signaturer, `app.ts`/`index.ts`-split |
+| [Zod — Schema-Driven Validation](https://bth-mvc.github.io/teacher/kmom01-4-zod/slides.html) | Varför schema-validering, `parse()` vs `safeParse()`, env-validering som första use case |
 
 ## Studiematerial
 
@@ -66,7 +66,7 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. De ger den
 | Issue 01-20 | [TypeScript Handbook — The Basics](https://www.typescriptlang.org/docs/handbook/2/basic-types.html) | Introduktion till TypeScript-typer och vad kompilatorn kontrollerar |
 | Issue 01-40 | [Docker — What is a container?](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/) | Förklarar vad containers är och varför de löser "fungerar på min maskin"-problemet |
 | Issue 01-50 | [Express 5.x — Getting started](https://expressjs.com/en/5x/api.html) | Routing och middleware i Express 5 |
-| Issue 01-70 | [Zod — Getting started](https://zod.dev/?id=basic-usage) | Schema-validering med `parse()` — samma bibliotek används i kmom02 för request-data |
+| Issue 01-70 | [Zod — Getting started](https://zod.dev/?id=basic-usage) | Schema-validering med `parse()` och `safeParse()` — samma bibliotek används i kmom02 för request-data |
 
 **Referens** — Ha dessa öppna i en flik när du kodar. Du behöver inte läsa dem i förväg — slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
@@ -94,9 +94,9 @@ Skriv din redovisningstext i `report/kmom01.md` i ditt repo. Frågorna nedan är
 
 2. Varför behöver en single-page application en SPA-fallback på servern? Beskriv vad som händer om du navigerar direkt till `/portfolio` i webbläsaren utan fallback.
 
-3. Förklara din Docker-setup: vad gör `docker-compose.yml` och varför kör du appen i en container snarare än direkt på din dator?
+3. Förklara din Docker-setup: vad gör din Dockerfile och `docker-compose.yml`, och varför har den två steg (two-stage build)? När kör du hela stacken i Docker och när kör du `npm run dev`?
 
-4. Vad är `tsconfig.json` och vad händer om du aktiverar `strict: true`?
+4. Vad är `tsconfig.json`? Välj en inställning i filen och förklara vad den gör.
 
 5. Vad gör ditt Zod-schema för miljövariabler? Vad händer om `JWT_SECRET` saknas när appen startar?
 
@@ -141,45 +141,49 @@ Studenten startar inte från noll och inte heller från sin kod i node-kursen. K
 
 Templaten inkluderar **färdig auth-kod** (login, logout, skyddade routes, JWT i httpOnly-cookies, bcrypt) strukturerad i lagerarkitekturen. Auth är förkunskap från node-kursen och är inte ett lärandemål i den här kursen — den finns i templaten som referensimplementation och för att kmom03:s säkerhetsmoment ska fungera från start.
 
-Docker Compose är kursens standarddevmiljö från vecka 1 och framåt — inte ett läromoment i sig. Målet med issue 01-40 är att devmiljön är på plats och fungerar; alla efterföljande kmom förutsätter att studenten jobbar i Docker Compose. Det eliminerar "fungerar på min maskin"-problem och gör MongoDB-hanteringen trivial från och med kmom02.
+Docker Compose är kursens standarddevmiljö från vecka 1 och framåt — inte ett läromoment i sig. MongoDB körs alltid i Docker. Efter issue 01-40 finns två lägen: dev-läge (`docker compose up -d mongodb` + `npm run dev`, med hot reload) som används för det dagliga arbetet i alla efterföljande issues, och full stack (`docker compose up -d --build`) för att kontrollera att Dockerfile och produktionsbygget fungerar. Byte från full stack till dev-läge kräver `docker compose stop api` (porten 3000).
 
 ### Pedagogisk notering
 
 Introducera **inte** lagerarkitektur (controller/service/repository) den här veckan. Logiken ska samlas i routes och börja kännas plottrigt — det upplevda behovet gör att kmom02 känns motiverat snarare än som ceremoni.
 
-SonarQube-rapporten i slutet av kmom01 förstärker det här: studenten ser *i siffror* att koden har problem. Det är ett starkare argument för refaktorering än vad läraren kan säga i en föreläsning.
-
-SonarQube ingår förkonfigurerat i kursens docker-compose men startar inte automatiskt. Studenten kör det när de vill ha feedback: `npm run sonar`. I kmom02 kör studenten om skanningen och jämför mot baslinjen. I kmom04 formaliseras hela kedjan: SonarLint i editorn, sonar-scanner pre-push hook och ESLint + coverage i CI.
+SonarQube är ett valfritt spår (sedan 2026-10-20): en lokal SonarQube-server är för tung för många studenters datorer. Det ingår förkonfigurerat i kursens docker-compose men startar inte automatiskt — studenten kör `npm run sonar` om de vill. Den som tar en baseline i 01-15 kan jämföra efter refaktoreringen i den valfria 02-70 och lägga scannern i pre-push-hooken i den valfria 04-50. Det obligatoriska spåret är `npm run check` i pre-push-hooken och ESLint + coverage i CI (kmom04). Editortilläggen (ESLint, Prettier, SonarQube for IDE m.fl.) är ett förslag, inget krav.
 
 ### Issue 01-35 — client-exploration
 
-Direkt efter att `express.static()` är på plats och frontenden är synlig för första gången studeras klientkoden. Målet är inte att studenten ska förstå Svelte — utan att förstå det kontrakt deras backend behöver uppfylla.
+Direkt efter att `express.static()` är på plats och frontenden är synlig för första gången utforskar studenten appen på `http://localhost:3000`. Målet är inte att studenten ska förstå Svelte — utan att se det kontrakt deras backend behöver uppfylla.
 
 **Vad studenten gör:**
-1. Titta på `client/src/lib/state/apidoc.svelte.ts` — förstå `UNLOCK`-mappningen som kopplar SvelteKit-routes till backend-endpoints
-2. Titta på `client/src/routes/portfolio/+page.svelte` — vad hämtar den och vad förväntar den sig i svaret?
-3. Starta Svelte-devservern mot din körande backend: `cd client && npm run dev`
-4. Navigera till `http://localhost:5173` — se vilka sektioner som är låsta och varför
+1. Registrera ett konto och logga in
+2. Se vilka sektioner som är låsta (🔒) — de låses upp när backend deklarerar motsvarande endpoints i `/api/doc`
+3. Titta på hälsopanelen som läser `GET /health`
+4. (För den nyfikne) Läs `client/src/lib/state/apidoc.svelte.ts`, som läser `GET /api/doc` och låser upp sektioner
+
+"Väntar på prisdata…" och 404-fel i konsolen är väntade i det här läget.
 
 ### `/api/doc` som upplåsningsmekanism
 
-Frontenden probar `GET /api/doc` vid uppstart och aktiverar UI-sektioner baserat på deklarerade endpoints. Minimalt svar vid start:
+Frontenden probar `GET /api/doc` vid uppstart och låser upp sektioner baserat på deklarerade endpoints. Studentens router efter issue 01-60:
 
 ```typescript
-app.get('/api/doc', (req, res) => {
+import { Router } from 'express'
+
+export const docRouter = Router()
+
+docRouter.get('/', (_req, res) => {
   res.json({
     name: 'börsklient-api',
     version: '1.0.0',
     endpoints: [
-      { method: 'GET', path: '/health' },
-      { method: 'GET', path: '/api/doc' },
-      { method: 'GET', path: '/api/portfolio' },
-    ]
+      { method: 'GET', path: '/health', description: 'Server health status' },
+      { method: 'GET', path: '/api/doc', description: 'API documentation' },
+      { method: 'GET', path: '/api/portfolio', description: "Current user's portfolio" },
+    ],
   })
 })
 ```
 
-Studenten utökar `/api/doc` i varje kmom när nya routes läggs till. Det är ett enkelt mönster som skapar vanan att dokumentera API:et löpande.
+Listan innehåller bara routes som studenten själv bygger — de färdiga auth-routerna tas inte med. Dashboarden visar då 3 endpoints och 2 / 9 sektioner. Studenten utökar `/api/doc` i varje kmom när nya routes läggs till. Det är ett enkelt mönster som skapar vanan att dokumentera API:et löpande.
 
 ### Zod env-mönster
 
@@ -188,14 +192,27 @@ import { z } from 'zod'
 
 const envSchema = z.object({
   PORT: z.string().default('3000'),
-  MONGODB_URI: z.string(),
-  JWT_SECRET: z.string().min(32),
+  MONGO_HOST: z.string().default('localhost'),
+  // ... fler variabler
+  JWT_SECRET: z.string().min(32, 'must be at least 32 characters'),
 })
 
-export const env = envSchema.parse(process.env)
+const result = envSchema.safeParse(process.env)
+
+if (!result.success) {
+  const problems = result.error.issues.map((issue) => `  ${issue.path.join('.')}: ${issue.message}`)
+  throw new Error(`Invalid environment variables:\n${problems.join('\n')}`)
+}
+
+const parsed = result.data
+
+export const env = {
+  ...parsed,
+  MONGODB_URI: `mongodb://${parsed.MONGO_HOST}:${parsed.MONGO_PORT}/${parsed.MONGO_DB}`,
+}
 ```
 
-Studenten har aldrig sett Zod förut. Fokus i issue 01-70 är att förstå att ett schema beskriver förväntad form, och att `parse()` kastar ett tydligt fel vid uppstart om något saknas. I kmom02 används Zod igen för att validera inkommande request-data i controllers — det är ett annat användningsfall (opålitlig användardata istället för känd konfiguration) och bygger naturligt på denna grund.
+Studenten har aldrig sett Zod förut. Fokus i issue 01-70 är att förstå att ett schema beskriver förväntad form, och att appen stoppar vid uppstart med ett kort, tydligt fel (en rad per variabel) om något saknas. `safeParse()` används i stället för `parse()` så att felet blir en rad i stället för en lång `ZodError`. I kmom02 används Zod igen för att validera inkommande request-data i controllers — det är ett annat användningsfall (opålitlig användardata istället för känd konfiguration) och bygger naturligt på denna grund.
 
 ### Kursens applikationsdomän
 
