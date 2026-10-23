@@ -12,27 +12,26 @@ Den här veckan arbetar du med säkerhet som ett upplevt problem — inte som et
 
 ## Issues
 
-Arbeta igenom issues i ordning. Varje issue börjar med att du demonstrerar en attack, och avslutas med att du verifierar att attacken inte längre fungerar.
+Arbeta igenom issues i ordning. De flesta issues börjar med att du kör en attack mot din app, och avslutas med att du verifierar att attacken inte längre fungerar.
 
 Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
 | Issue | Namn | Attack som demonstreras | Fix du implementerar |
 |---|---|---|---|
-| 03‑10 | `xss` | Injicerat script via inmatningsfält renderas i UI:t | Content-Security-Policy via Helmet, sanitera lagrad input |
-| 03‑20 | `csrf` | Förfalskad förfrågan från evil.html utnyttjar inloggad session | `SameSite=strict` på JWT-cookie, CSRF-token för mutationer |
-| 03‑30 | `cors` | Wildcard CORS + credentials läcker data till annan origin | Explicit origin-lista, korrekt preflight-hantering |
-| 03‑40 | `helmet` | Saknade säkerhetsheaders synliga i browser dev tools | Helmet med genomgång av vad varje header skyddar mot |
-| 03‑50 | `rate-limiting` | Script hamrar login-endpointen utan begränsning | `express-rate-limit` på auth-routes |
-| 03‑60 | `password-change` | Byt lösenord utan att känna till det gamla | `PATCH /api/me/password` — verifiera nuvarande lösenord |
-| 03‑70 | `crypto` | bcrypt-hash i klartext i logg, lösenordsjämförelse med `===` | Korrekt bcrypt cost factor, timing-säker jämföring, rensa känslig data ur loggar |
+| 03‑10 | `xss` | Ett namn med en `<img onerror>`-tagg körs som script varje gång namnet visas (lagrad XSS) | Sanera namnet med `sanitize-html` innan det sparas |
+| 03‑20 | `samesite-cors` | En sida på annan site (`evil.html`) skickar med din inloggade cookie; en sida på annan origin (`evil-cors.html`) läser din data | `SameSite=strict` på JWT-cookien, explicit CORS origin-lista |
+| 03‑40 | `helmet` | Svaren saknar säkerhetsheaders, och den lagrade XSS:en finns kvar i databasen | Helmet med genomgång av varje header, CSP anpassad till Svelte-frontenden som stoppar den lagrade XSS:en |
+| 03‑50 | `rate-limiting` | Ett skript provar 15 lösenord i rad utan att stoppas | `express-rate-limit` på login och register |
+| 03‑60 | `password-change` | Den som tar över en session kan byta lösenordet och låsa ute användaren | `PATCH /api/me/password` som kräver nuvarande lösenord — låser upp profilsidans formulär |
+| 03‑70 | `crypto` | En lösenordshash hamnar i loggen | Redaction i loggern, mät bcrypts cost factor, varför `===` inte duger för lösenord |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 03‑75 | `secure-logging` | Säker loggning med Pino — logga misslyckade inloggningar, filtrera bort känslig data |
-| 03‑80 | `brute-force` | Räkna misslyckade inloggningsförsök, lås konto temporärt |
-| 03‑85 | `refresh-tokens` | Refresh tokens + token rotation — ny token vid varje refresh |
+| 03‑75 | `secure-logging` | Logga säkerhetshändelser (misslyckad och lyckad inloggning, registrering, lösenordsbyte) med strukturerade fält |
+| 03‑80 | `brute-force` | Räkna misslyckade inloggningar per konto och lås kontot i 15 minuter efter fem |
+| 03‑85 | `refresh-tokens` | Kortlivad access token och refresh token i databasen — roteras vid varje användning och tas bort vid utloggning |
 
 ## Föreläsningar
 
@@ -40,9 +39,9 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med
 
 | Titel | Om |
 |---|---|
-| [Om kmom03 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom03-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
-| [Webbsäkerhet — ramverk och organisationer](https://bth-mvc.github.io/teacher/kmom03-1-security-frameworks/slides.html) | OWASP Top Ten, CVE, CWE, NIST — hur sårbarhetskategorier samlas in, klassificeras och används i praktiken |
-| [Försvar som programmerare — från OWASP till kod](https://bth-mvc.github.io/teacher/kmom03-2-developer-defense/slides.html) | Hur man som backend-utvecklare skyddar sig mot de vanligaste sårbarheterna: CSP, SameSite, CORS-konfiguration, säkerhetsheaders, rate limiting, korrekt kryptografi — fokus på försvarsmönstren, inte attackdetaljerna |
+| [About kmom03 — how the week fits together](https://bth-mvc.github.io/teacher/kmom03-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [Web Security — Frameworks and Organizations](https://bth-mvc.github.io/teacher/kmom03-1-security-frameworks/slides.html) | OWASP Top Ten, CVE, CWE, NIST — hur sårbarhetskategorier samlas in, klassificeras och används i praktiken |
+| [Defense as a Developer](https://bth-mvc.github.io/teacher/kmom03-2-developer-defense/slides.html) | Hur man som backend-utvecklare skyddar sig mot de vanligaste sårbarheterna: CSP, SameSite, CORS-konfiguration, säkerhetsheaders, rate limiting, korrekt kryptografi — fokus på försvarsmönstren, inte attackdetaljerna |
 
 ## Fördjupningsmaterial
 
@@ -54,7 +53,7 @@ Det här behöver du inte läsa för att klara veckans issues — issuetexten oc
 |---|---|---|
 | Issue 03-10 | [MDN — Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) | Förklarar hur CSP-headers fungerar och vad de skyddar mot |
 | Issue 03-20 | [OWASP — CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) | Förklarar attacken och tillgängliga skyddsmekanismer |
-| Issue 03-30 | [MDN — CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) | Hur same-origin policy fungerar och vad CORS-headers gör |
+| Issue 03-20 | [MDN — CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) | Hur same-origin policy fungerar och vad CORS-headers gör |
 | Issue 03-70 | [OWASP — Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) | Varför bcrypt är rätt val och vad cost factor innebär |
 
 **Referens** — Slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
@@ -88,10 +87,9 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 
 ## Inlämning
 
-1. Kör `npm run sonar` och jämför med din kmom02-scan. Notera förändringar i din redovisningstext.
-2. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
-3. Skriv klart din redovisningstext i `report/kmom03.md` och ta bort platshållartexten.
-4. Verifiera att koden är ren innan du taggar:
+1. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
+2. Skriv klart din redovisningstext i `report/kmom03.md` och ta bort platshållartexten.
+3. Verifiera att koden är ren innan du taggar:
 
 ```bash
 npm run check
@@ -99,7 +97,7 @@ npm run check
 
 Alla kontroller ska passera — typecheck, lint, format och tester. Åtgärda eventuella fel innan du går vidare. Samma kontroller körs i CI, så här fångar du felen först.
 
-5. Kör en självkoll som kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda:
+4. Kör en självkoll som kontrollerar att redovisningstexten är klar och att alla obligatoriska issues är stängda:
 
 ```bash
 npm run check-submission -- kmom03
@@ -107,7 +105,7 @@ npm run check-submission -- kmom03
 
 Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`). Annars hoppas den över, och då behöver du själv kontrollera att dina issues är stängda.
 
-6. Committa, tagga och pusha:
+5. Committa, tagga och pusha:
 
 ```bash
 git add report/kmom03.md
@@ -122,7 +120,7 @@ Taggen startar ett CI-flöde på GitHub, under fliken **Actions**. Det kör samm
 
 Behöver du uppdatera din inlämning efteråt? Committa ändringen och skapa en ny tagg med ökad patch-version, t.ex. `v3.0.1`, och pusha den. Flytta aldrig en tagg som redan är pushad.
 
-7. Öppna en pull request från `main` till `bth/submit/kmom03` i ditt repo. CI körs även på pull requesten — kontrollera att den blir grön där också.
+6. Öppna en pull request från `main` till `bth/submit/kmom03` i ditt repo. CI körs även på pull requesten — kontrollera att den blir grön där också.
 
 Läraren läser din redovisningstext via `report/kmom03.md` i PR:en.
 
@@ -137,23 +135,24 @@ Läraren läser din redovisningstext via `report/kmom03.md` i PR:en.
 
 Säkerhet som ett upplevt problem, inte ett paket man installerar. Varje issue börjar med en attack mot studentens egna app — studenten ser sårbarheten med egna ögon, förstår hur den utnyttjas, och implementerar sedan fixarna i backenden.
 
-Svelte-frontenden är medvetet byggd med säkerhetshål som aktiveras i en "attack-läge"-vy i UI:t. Det gör attackerna påtagliga utan att studenten behöver sätta upp en separat angripare.
+Attackerna körs mot studentens egen app, utan något "attack-läge" i UI:t. Svelte-frontenden har ett medvetet hål: headern renderar namnet med `{@html}` (03-10). Attacksidorna `public/evil.html` och `public/evil-cors.html` serveras med `npx http-server public/ -p 8080` och öppnas via `127.0.0.1:8080` (annan site) respektive `localhost:8080` (samma site, annan origin) i 03-20. Övriga attacker är curl-loopar, DevTools och serverloggen.
 
 Studenterna kan sedan node-kursen: JWT i httpOnly-cookies, bcrypt, auth-middleware. Auth-koden finns färdigskriven i kursens template — den är inte ett lärandemål utan förutsättningen för att attackerna i det här momentet ska vara meningsfulla.
 
 ### Upplägget per issue
 
-Varje obligatoriskt issue följer samma struktur:
+Issuerna följer i regel samma struktur, och varje Step 0 säger exakt vad studenten ska se:
 
-1. **Attacken** — studenten kör attack-demonstrationen i frontenden och ser vad som händer
+1. **Attacken** — studenten kör attacken mot sin app och ser vad som händer
 2. **Förklaringen** — vad är sårbarheten, hur fungerar attacken, vad är risken i verkligheten
 3. **Fixarna** — studenten implementerar skyddet i backenden
 4. **Verifiering** — studenten kör demonstrationen igen och bekräftar att attacken inte längre fungerar
 
 ### Vad frontenden låser upp
 
-`PATCH /api/me/password` → "Byt lösenord"-formulär i profilvyn aktiveras.
-Attack-läget i UI:t stängs av steg för steg när studenten implementerar varje fix.
+`PATCH /api/me/password` (03-60) → menyvalet **Profil** och lösenordsformuläret på profilsidan låses upp. Fel nuvarande lösenord ger 400, inte 401 — klienten loggar ut vid 401.
+
+Klientens API-dokumentation räknar `POST /api/auth/register`, `login`, `logout` och `PATCH /api/me/password` till kmom03-gruppen **Säkerhet**. Auth-routerna följer med templaten men deklareras inte i 01-60; 03-60 lägger till alla fyra i `/api/doc` så att gruppen visar `4 / 4`. `POST /api/auth/refresh` (03-85) räknas som valfri. Klienten anropar refresh automatiskt vid 401 och försöker igen, så 03-85 syns i webbläsaren först när access token har gått ut.
 
 ### GET /api/me — profilvyn
 
@@ -174,13 +173,16 @@ Attack-first-upplägget kräver att kursteamet bygger demonstrationerna in i Sve
 
 **CSRF** är extra relevant för den här kursen eftersom auth bygger på httpOnly-cookies — exakt den angreppsytan som CSRF exploaterar. `SameSite=strict` är en enradsfix men studenten förstår varför den behövs.
 
-**CORS** hanteras ofta som "lägg till cors-paketet och sätt wildcard". Attacken visar att wildcard + credentials faktiskt läcker data.
+**CORS** hanteras ofta som "lägg till cors-paketet och sätt wildcard". Templaten har reflekterad origin (`origin: true`) med `credentials: true`, vilket är värre än wildcard: webbläsaren skickar aldrig cookies till `*`, men en reflekterad exakt origin går igenom. Attacken visar att det läcker data.
 
-Refresh tokens (valfritt) ökar komplexiteten i auth-flödet märkbart. Det läggs valfritt med tydlig varning om att implementationen är subtil.
+Refresh tokens (valfritt, 03-85) ökar komplexiteten i auth-flödet märkbart och är veckans största issue. Det står i issuen.
 
-### Öppna frågor
+### Beslut
 
-- Hur mycket av XSS-fixarna hamnar i frontenden vs backenden? Frontendsanitering är inte studentens ansvar i den här kursen — fokus ska vara på CSP-headers och serversanitering.
-- Ska HTTPS-konfiguration i Docker ingå? Konceptuellt viktigt, men certifikat-hantering lokalt är friktion. Möjligen en kort föreläsning utan obligatoriskt issue — HTTPS i produktion hör hemma i ops-kursen.
+- **03-20 och 03-30 slogs ihop** (2026-10-23) till `samesite-cors`: båda attackerna använder samma attackserver, och skillnaden mellan site och origin blir tydligast sida vid sida.
+- **XSS-fixen ligger i backenden**: 03-10 sanerar namnet innan det sparas, 03-40 lägger till CSP som andra försvarslinje. Frontendens `{@html}` är inte studentens ansvar.
+- **03-70 är obligatoriskt**, med attacken först: en hash i loggen. Strukturerade säkerhetshändelser ligger i valfria 03-75.
+- **HTTPS** hör till ops-kursen (se `outside-scope.mdx`).
+- **Rate limitern** (03-50) tillåter 10 login/register per IP per 15 minuter och per serverprocess. Loopar i 03-80 och 03-85 är dimensionerade för att hålla sig under den; att spara en fil startar om dev-servern och nollställer räknaren.
 
 </details>
