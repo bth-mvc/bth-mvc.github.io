@@ -8,7 +8,7 @@ revision:
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-Den här veckan refaktorerar du koden från kmom01. Logiken som samlades i routes bryts upp i tre separata lager — controllers, services och repositories — och du lägger till strukturerad felhantering, Zod-validering av inkommande data och publika IDs. Veckan avslutas med att du mäter resultatet i SonarQube och jämför med baslinjemätningen från kmom01.
+Den här veckan refaktorerar du koden från kmom01. Logiken som samlades i routes bryts upp i tre separata lager — controllers, services och repositories — och du lägger till en ny felklass i felhanteringen och Zod-validering av inkommande data. Valfritt kan du flytta genereringen av publika IDs till repository-lagret och mäta refaktoreringen i SonarQube.
 
 Det här är arkitekturen du bygger. En HTTP-request rör sig nedåt genom lagren — varje lager har ett enda ansvar och vet ingenting om lagren ovanför.
 
@@ -28,7 +28,7 @@ MongoDB
 HTTP Response
 ```
 
-Issues 02-10 till 02-30 bygger de tre mittlagerna ett i taget. Issues 02-40 till 02-60 förfinar arkitekturen.
+Issues 02-10 till 02-30 bygger de tre mittlagerna ett i taget. Issues 02-40 och 02-50 förfinar arkitekturen med felhantering och validering.
 
 ## Issues
 
@@ -40,16 +40,16 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 |---|---|---|
 | 02‑10 | `controllers` | Flytta route-logik till controllers — routes pekar bara på controller-funktioner |
 | 02‑20 | `services` | Flytta affärslogik till services — controllers anropar services |
-| 02‑30 | `repositories` | Flytta all Mongoose-kod till repositories — services anropar repositories |
-| 02‑40 | `error-handling` | Custom error-klasser (`AppError`, `ValidationError`, `NotFoundError`), global error handler, 404 fallback |
-| 02‑50 | `zod-request` | Zod-scheman i controllers för att validera inkommande request-data, typsäkra DTOs |
-| 02‑70 | `sonar` | Kör SonarQube igen och jämför rapporten med baslinjemätningen från kmom01 |
+| 02‑30 | `repositories` | Skapa Portfolio-modellen och ett repository — servicen hämtar riktig data ur databasen |
+| 02‑40 | `error-handling` | Följ hur ett fel går från service till HTTP-svar, lägg till `ConflictError` (409) för upptagen e-postadress |
+| 02‑50 | `zod-request` | Ny endpoint `GET /api/portfolio/holdings/:token` — validera URL-parametern med Zod, typer med `z.infer<>` |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 02‑60 | `public-id` | Generera publikt ID med `nanoid` i repository-lagret — använd det i URL:er istället för MongoDB `_id` |
+| 02‑60 | `public-id` | Flytta genereringen av användarens publika ID (`nanoid`) från service till repository |
+| 02‑70 | `sonar` | Kör SonarQube igen och jämför med baslinjemätningen — vad siffrorna visar och inte visar |
 
 ## Föreläsningar
 
@@ -57,11 +57,11 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med
 
 | Titel | Om |
 |---|---|
-| [Om kmom02 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom02-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
-| [MVC och lagerarkitektur — varför mönstret finns](https://bth-mvc.github.io/teacher/kmom02-1-layered-architecture/slides.html) | Problemet med logik-i-routes, separation of concerns |
-| [Controllers, services och repositories i TypeScript](https://bth-mvc.github.io/teacher/kmom02-2-controllers-services-repos/slides.html) | Konkret refaktorering steg för steg |
-| [Felhantering som arkitekturell princip](https://bth-mvc.github.io/teacher/kmom02-3-error-handling/slides.html) | Custom error-klasser, Express fyra-argument-middleware, middleware-ordning |
-| [Zod för request-validering](https://bth-mvc.github.io/teacher/kmom02-4-zod-request/slides.html) | `safeParse` i controllers, felformat mot klienten, `z.infer<>` för typsäkra DTOs |
+| [About kmom02 — how the week fits together](https://bth-mvc.github.io/teacher/kmom02-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [MVC and Layered Architecture](https://bth-mvc.github.io/teacher/kmom02-1-layered-architecture/slides.html) | Problemet med logik-i-routes, separation of concerns |
+| [Controllers, Services, and Repositories](https://bth-mvc.github.io/teacher/kmom02-2-controllers-services-repos/slides.html) | Konkret refaktorering steg för steg |
+| [Error Handling as an Architectural Principle](https://bth-mvc.github.io/teacher/kmom02-3-error-handling/slides.html) | Custom error-klasser, Express fyra-argument-middleware, middleware-ordning |
+| [Zod for Request Validation](https://bth-mvc.github.io/teacher/kmom02-4-zod-request/slides.html) | `safeParse` i controllers, felformat mot klienten, `z.infer<>` för typsäkra DTOs |
 
 ## Fördjupningsmaterial
 
@@ -169,7 +169,9 @@ Response (DTO)
 
 ### Vad frontenden låser upp
 
-Ingenting nytt — och det är poängen. Portfolioöversikten och auth-formulären som fungerade i kmom01 ska fortsätta fungera efter refaktoreringen. Frontenden är det implicita regressionstestet: om den slutar fungera bröt studenten något i refaktoreringen.
+Nästan ingenting — och det är poängen. Portfolioöversikten och auth-formulären som fungerade i kmom01 ska fortsätta fungera efter refaktoreringen. Frontenden är det implicita regressionstestet: om den slutar fungera bröt studenten något i refaktoreringen.
+
+Undantag: när 02-50 deklarerar `GET /api/portfolio/holdings/:token` i `/api/doc` blir varje innehav i portföljen klickbart och öppnar en detaljvy (`/portfolio/:token`). Dashboardens "Innehav" visar 0 kr även med innehav, eftersom klienten väntar sig fältet `holdingsValue` som bara finns i lösningen.
 
 ### Pedagogisk notering
 
@@ -179,15 +181,15 @@ Refaktoreringen i kmom02 är därmed inte en övning i att uppfinna mönstret, u
 
 Läraren bör i föreläsningen visa refaktoreringen som en levande process: börja med en route full av logik och bryt upp den steg för steg live. Det är svårt att förmedla *varför* i text.
 
-### SonarQube — andra mätpunkten
+### SonarQube — andra mätpunkten (valfri)
 
-När refaktoreringen är klar kör studenten `npm run sonar` igen och jämför rapporten med baslinjemätningen från kmom01. Förbättringen i siffror (komplexitet, duplicering, code smells) är det konkreta beviset på att lagerarkitektur inte bara är teori.
+När refaktoreringen är klar kan studenten (valfria 02-70) köra `npm run sonar` igen och jämföra med baslinjemätningen från 01-15. Förvänta dig inte ett tydligt bevis i siffror. Testkörning i mvc-claude5 (2026-10-23): maintainability issues 9 → 3 (men nästan alla borttagna var TODO-kommentarer som kmom01 löste, inte lagren), cyklomatisk komplexitet 57 → 64, funktioner 31 → 41, komplexitet per funktion 1,84 → 1,56, rating A båda gångerna, duplicering 0 % båda gångerna, coverage 31,6 → 15,9 %. Baslinjen tas tidigt i kmom01 och kmom01:s portfolio-route är en stub, så det finns lite route-logik att flytta. Issuen gör därför en poäng av vad verktyget inte ser: att controllern inte längre pratar med databasen och att servicen kan anropas utan Express.
 
-SonarLint i editorn introduceras i kmom04 när hela kvalitetskedjan formaliseras — SonarLint ger löpande feedback, `npm run sonar` ger djupare analys on-demand, och pre-push hook blockerar push om quality gate inte passerar. Att dela upp kedjan med SonarLint i kmom02 och resten i kmom04 splittrar storyn i onödan.
+Eftersom SonarQube-spåret är valfritt får föreläsningen bära argumentet för lagerarkitektur: visa före/efter i koden (kortare funktioner, ett ansvar per lager, testbarhet).
 
 ### Publikt ID med nanoid
 
-Routes i node-kursen använde MongoDB `_id` direkt i URL:er. Det läcker implementationsdetaljer och gör IDs instabila vid schema-migrationer. Nu när repository-lagret finns är det rätt plats att lösa det:
+Routes i node-kursen använde MongoDB `_id` direkt i URL:er. Det läcker implementationsdetaljer och gör IDs instabila vid schema-migrationer. `publicId` finns redan på `User` i templaten och genereras i `auth.service.ts`; valfria 02-60 flyttar genereringen till repository-lagret, där den hör hemma:
 
 ```typescript
 import { nanoid } from 'nanoid'
@@ -198,8 +200,8 @@ const publicId = nanoid()   // → "V1StGXR8_Z5jdHi6B-myT"
 
 Mongoose-dokumentet får ett extra fält `publicId`. Routes och controllers exponerar bara `publicId` — aldrig `_id`.
 
-### Öppna frågor
+### DTOs
 
-- Ska DTOs vara egna klasser/typer eller räcker det med Zod-inferens (`z.infer<typeof schema>`)?
+Beslut: Zod-inferens räcker (`z.infer<typeof schema>`), inga egna DTO-klasser. 02-50 exporterar `HoldingParams` från controllern men skickar bara vidare token-strängen; varje lager har egna interfaces (`Holding` i service och repository) så att en formändring i ett lager inte bryter de andra.
 
 </details>
