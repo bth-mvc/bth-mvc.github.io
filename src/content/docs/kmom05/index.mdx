@@ -18,26 +18,27 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 05‑10 | `api-key` | Konfigurera API-nyckel och börsens bas-URL i `.env`, verifiera med ett första anrop |
-| 05‑20 | `mock-server` | Kör lokal mock-server för utveckling, koppla om till live-börsen med miljövariabel |
-| 05‑30 | `market-data` | Hämta tokens och orderbok från börsen, visa i Svelte-frontenden |
-| 05‑40 | `place-orders` | Implementera köp/säljorder, hantera felfall (otillräckliga medel, okänd token) |
-| 05‑50 | `webhooks` | Ta emot och HMAC-verifiera webhooks (mock-server lokalt, polling-fallback mot live-börsen) |
-| 05‑60 | `sse-feed` | Prenumerera på börsens SSE-flöde, relay:a realtidspriser och händelser till Svelte via egen SSE |
+| 05‑10 | `api-key` | Starta mock-börsen, skriv en klient som skickar API-nyckeln och verifiera med ett första anrop |
+| 05‑30 | `market-data` | Hämta tokens och orderbok via en market service och exponera dem i ditt API, så låses sidan **Marknad** upp |
+| 05‑40 | `place-orders` | `POST /api/orders` med Zod-validering och felhantering, för ett konto som du kopplar till din plånbok på börsen |
+| 05‑45 | `webhook-receiver` | Ta emot webhooks från börsen och verifiera deras HMAC-signatur |
+| 05‑50 | `webhook-portfolio` | Uppdatera det kopplade kontots portfölj när en order fylls |
+| 05‑60 | `sse-feed` | Prenumerera på börsens SSE-flöde och skicka priserna vidare till frontenden, så att prisgrafen på dashboarden lever |
+| 05‑70 | `portfolio-market-value` | Värdera portföljen efter börsens aktuella priser: databasen sparar vad du äger, servicen räknar fram vad det är värt |
 
 Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utökningar i kmom10.
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 05‑65 | `trade-history` | Hämta och visa paginerad handelshistorik med cursor-pagination |
+| 05‑65 | `trade-history` | Spara affärerna och lista dem med cursor-pagination, så låses sidan **Handel** upp |
 
 ## Föreläsningar
 
-Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med börsserverns API-föreläsning — den ger helheten du behöver för att förstå hur delarna passar ihop.
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med föreläsningen om tokenbörsen, den ger helheten du behöver för att förstå hur delarna passar ihop.
 
 | Titel | Om |
 |---|---|
-| [Om kmom05 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom05-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [About kmom05 — how the week fits together](https://bth-mvc.github.io/teacher/kmom05-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
 | [Tokenbörsen — konceptet och API:et](https://bth-mvc.github.io/teacher/kmom05-1-token-exchange/slides.html) | Börsserverns design, matchningsmotorn, tokentyper, gamification, lokal mock-server |
 | [Att konsumera REST-API:er — patterns och fallgropar](https://bth-mvc.github.io/teacher/kmom05-2-consuming-rest-apis/slides.html) | Headers, felhantering, timeouts |
 | [Webhooks — ta emot och verifiera](https://bth-mvc.github.io/teacher/kmom05-3-webhooks/slides.html) | HMAC-signaturer, idempotens, retry från avsändarens sida |
@@ -51,14 +52,15 @@ Det här behöver du inte läsa för att klara veckans issues — issuetexten oc
 
 | Hör till | Titel | Varför |
 |---|---|---|
-| Issue 05-50 | [GitHub Docs — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) | Förklarar HMAC-signaturverifiering i praktiken — samma mönster som börsen använder |
+| Issue 05-45 | [GitHub Docs — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) | Förklarar HMAC-signaturverifiering i praktiken — samma mönster som börsen använder |
+| Issue 05-45 | [Stripe — Verify webhook signatures](https://docs.stripe.com/webhooks#verify-events) | Samma mönster hos en betaltjänst, med tidsstämpel mot replay-attacker |
 | Issue 05-60 | [MDN — Server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) | SSE-formatet, EventSource och reconnect-beteende |
 
 **Referens** — Slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
 
 | Verktyg | Länk |
 |---|---|
-| Börsserverns API-dokumentation | Se Swagger-länk i repots README |
+| Börsens API-dokumentation (Swagger) | `http://localhost:4000/docs` (mocken), [exchange.dbwebb.se/docs](https://exchange.dbwebb.se/docs) (live) |
 | MDN — EventSource | [MDN — EventSource](https://developer.mozilla.org/en-US/docs/Web/API/EventSource) |
 | MDN — Using SSE | [MDN — Using server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) |
 | eventsource (npm) | [npmjs.com/package/eventsource](https://www.npmjs.com/package/eventsource) |
@@ -81,11 +83,12 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 - **Ett externt API** — Hur var det att använda någon annans API jämfört med att bygga ett eget? Vad var oväntat?
 - **Säker kommunikation** — Hur hanterar du API-nyckeln, och varför kontrolleras webhookarnas signaturer?
 - **Realtid** — Hur tar sig ett nytt pris från börsen hela vägen till webbläsaren?
+- **Portföljen** — Varför sparar databasen hur mycket du äger men inte vad det är värt?
 - Vad är din viktigaste insikt (TIL — Today I Learned) från veckan?
 
 ## Inlämning
 
-1. Kör `npm run sonar` och jämför med din kmom04-scan. Notera förändringar i din redovisningstext.
+1. (Valfritt) Kör `npm run test:coverage` och sedan `npm run sonar`, så att SonarQube får färsk coverage. Jämför med din förra scan under **Activity** i SonarQube. Notera förändringar i din redovisningstext.
 2. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
 3. Skriv klart din redovisningstext i `report/kmom05.md` och ta bort platshållartexten.
 4. Verifiera att koden är ren innan du taggar:
@@ -142,21 +145,24 @@ Tokentyper:
 
 | Typ | Exempel | Beteende |
 |---|---|---|
-| **Stabil** | FIKA, KAFFE | Låg volatilitet, säker hamn |
-| **Volatil** | DBW, NODE | Stora prissvängningar, hög risk/reward |
-| **Yield** | HODL | Betalar automatisk utdelning till alla innehavare varje timme |
+| **Stabil** | FIKA, SUDO | Låg volatilitet, säker hamn |
+| **Volatil** | YOLO, DEPLOY, MEME | Stora prissvängningar, hög risk/reward |
+| **Yield** | HODL | Tänkt att betala utdelning till innehavarna. Inte byggt i börsen (2026-10-26), bara typen finns |
 
-### Börsserverns API (skiss)
+### Börsserverns API (byggt, v1.3.0)
 
 ```
-GET  /assets                 — lista alla tokens + typ + aktuellt pris
-GET  /assets/:id/orderbook   — aktiva köp/säljordrar för en token
-POST /orders                 — lägg ny order (köp/sälj)
-GET  /trades                 — genomförda affärer (paginerat, cursor)
-GET  /portfolio              — inloggad students innehav + yield-historik
-GET  /leaderboard            — portfoliovärde rankad för alla studenter
-SSE  /market/feed            — priser, affärer, marknadshändelser, yield-utbetalningar
+GET  /assets                      — alla tokens med typ och aktuellt pris
+GET  /assets/:id/orderbook        — aktiva köp- och säljordrar för en token
+POST /orders                      — lägg en order (köp/sälj), högst 10 % från referenspriset
+GET  /trades                      — genomförda affärer (paginerat, cursor)
+GET  /portfolio                   — studentens plånbok på börsen
+GET  /leaderboard                 — portföljvärde, rankat (market makern markerad)
+GET  /market/feed                 — SSE: priser och affärer
+GET  /webhooks/pending, POST /webhooks/pending/ack, GET /webhooks/secret — polling av webhooks
 ```
+
+Live på `https://exchange.dbwebb.se` (Swagger på `/docs`), deploy vid `v*`-tagg. Startbalans 100 000. Market makern **Marvin** (`marvin`) lägger passiva ordrar på båda sidor så att det finns likviditet, med en gräns för hur stor position han tar. Mocken har samma API och en exempel-leaderboard med Marvin.
 
 ### Förutsättning
 
@@ -186,11 +192,13 @@ Webhooks kräver att studentens server är nåbar. Tre alternativ utvärderades:
 2. **Polling-endpoint** — börsen sparar payloads, studenten pollar `GET /webhooks/pending`
 3. **Mock-server lokalt** — mock-servern skickar webhooks direkt till `localhost:3000`
 
-**Beslut: kombination av 1 (mock lokalt) och 2 (polling live).**
+**Beslut: kombination av 1 (mock lokalt) och 2 (polling live).** Byggt 2026-10-25.
 
-- **Under utveckling:** mock-servern (05-20) kör lokalt och skickar webhooks till `localhost:3000`. Ingen tunnel behövs. Studenten implementerar HMAC-verifiering och webhook-hantering — fullt lärandemål.
-- **Mot live-börsen:** börsen erbjuder `GET /webhooks/pending` som fallback. Studenten pollar istället för att ta emot push. HMAC-signaturen finns i payload oavsett leveransmetod — verifieringslogiken är identisk.
-- **Valfritt:** studenter som vill kan använda ngrok mot live-börsen för den fulla upplevelsen, men det krävs inte.
+- **Under utveckling:** mock-servern (05-10) kör lokalt och skickar webhooks till `localhost:3000`. Ingen tunnel behövs. Studenten implementerar HMAC-verifiering och webhook-hantering — fullt lärandemål.
+- **Mot live-börsen:** börsen pushar inget utan köar signerade webhooks per student. Studenten pollar `GET /webhooks/pending` och kvitterar med `POST /webhooks/pending/ack` efter hanteringen (en okvitterad webhook kommer igen). Signaturen (`sha256=<hex>` av `body`) verifieras med samma kod som vid push. Hemligheten hämtas från börsen med `GET /webhooks/secret`.
+- **Mocken gör båda:** den pushar och köar samma webhook, så pollern kan byggas mot mocken och idempotensen (06-10) får ett verkligt skäl: samma webhook kommer två gånger.
+- **En wallet per API-nyckel:** studentens app kopplar ett lokalt konto (`EXCHANGE_USER_EMAIL`) till börsens wallet; det kontots portfölj speglar börsens.
+- **Valfritt:** studenter som vill kan använda ngrok mot live-börsen, men börsen pushar inte, så det ger inget.
 
 ### Varför HMAC-signaturverifiering är obligatoriskt
 
@@ -204,18 +212,18 @@ Det gemensamma marknadsflödet gör att studenter naturligt ser varandras arbete
 
 **05-65 (trade-history, cursor-pagination):** Tillför nytt koncept. Cursor-pagination är det verkliga mönstret för tidsseriedata och dyker upp i de flesta professionella API:er. Värt att behålla som valfri.
 
-**05-70 (socket-client):** Borttagen (2026-06-24). Socket.io är förkunskap från node-kursen och tillför inte tillräckligt. Socket.io mellan containers (sticky sessions, reverse proxy) är ett ops-ämne — noterat i NEXT-COURSE.md.
+**socket-client (gamla 05-70):** Borttagen (2026-06-24). Socket.io är förkunskap från node-kursen och tillför inte tillräckligt. Socket.io mellan containers (sticky sessions, reverse proxy) är ett ops-ämne — noterat i NEXT-COURSE.md. Numret 05-70 används sedan 2026-10-26 av `portfolio-market-value` (obligatorisk).
 
 **OBS:** Quizen nämner cursor-pagination men det täcks bara av den valfria 05-65. Antingen gör 05-65 obligatorisk eller ta bort cursor-frågan från quizen.
 
 ### Omfattning — notering (2026-06-23)
 
-Kmom05 har sex obligatoriska issues och är den mest kodintensiva veckan. Studenten bygger: exchange client, mock-integration, marknadsvy, orderläggning, webhook-hantering med HMAC, och SSE-relay. Varje issue introducerar ett nytt koncept. Om det visar sig för tungt kan 05-60 (SSE) flyttas till kmom06 — den är fristående och kräver inte de andra kmom05-issuena för att fungera.
+Kmom05 har sju obligatoriska issues och är den mest kodintensiva veckan. Studenten bygger: exchange client mot mocken, market service, orderläggning, webhook-mottagning med HMAC, portföljuppdatering från webhooks, SSE-relay och portföljvärdering efter marknadspris. (05-20 slogs ihop med 05-10, och den stora webhook-issuen delades i 05-45 och 05-50, 2026-10-25/26.) Varje issue introducerar ett nytt koncept. Om det visar sig för tungt kan 05-60 (SSE) flyttas till kmom06 — den är fristående och kräver inte de andra kmom05-issuena för att fungera.
 
 ### Öppna frågor
 
-- Hur stor är startbalansen och hur många tokens per student?
-- Hur ofta betalar yield-tokens utdelning och hur ofta triggas marknadshändelser?
+- ~~Hur stor är startbalansen?~~ 100 000 (2026-10-26), inga tokens från start.
+- Yield-utdelning och marknadshändelser finns inte i börsen. Bygga, eller ta bort ur föreläsningen om tokenbörsen?
 - Ska portfoliovärdet visas som kursgraf i Svelte-frontenden?
 - Hur hanteras det om börsen är nere under kursveckan?
 

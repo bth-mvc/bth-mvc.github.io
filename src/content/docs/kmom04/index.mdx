@@ -20,27 +20,29 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 |---|---|---|
 | 04‑10 | `unit-tests` | Enhetstester för services med mockade repositories (Vitest mock/spy) |
 | 04‑20 | `integration-tests` | Integrationstester för controllers med Supertest + `mongodb-memory-server` |
-| 04‑30 | `ci-quality` | CI-pipeline: lint + test + coverage-gräns (70% på services) |
-| 04‑40 | `eslint-rules` | ESLint-regler för `max-lines-per-function` och `complexity` |
-| 04‑50 | `quality-gate` | Pre-push hook med sonar-scanner mot lokal SonarQube — informativ scan, blockerar inte push |
+| 04‑30 | `ci-quality` | Coverage-gräns i CI: minst 70 % av raderna i services och repositories |
+| 04‑40 | `eslint-rules` | ESLint varnar för långa och komplexa funktioner (`max-lines-per-function`, `complexity`), du delar upp eller accepterar |
+| 04‑50 | `quality-gate` | Pre-push hooken kontrollerar coverage-gränsen, precis som CI |
 
 Valfria issues — gör dem om du vill utforska vidare:
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 04‑55 | `contract-testing` | Enkel contract test med Bruno CLI i CI |
+| 04‑55 | `contract-testing` | Contract tests med Bruno CLI mot den körande appen, lokalt och i CI |
+| 04‑60 | `sonar-gate` | SonarQube-scan i pre-push hooken — informativ, blockerar inte push och hoppas över när SonarQube inte körs |
 
 ## Föreläsningar
 
-Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med teststrategi-föreläsningen — den ger helhetsbilden som gör att de övriga fallen känns naturliga.
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med teststrategi-föreläsningen — den ger helhetsbilden som gör att de övriga känns naturliga.
 
 | Titel | Om |
 |---|---|
-| [Om kmom04 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom04-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
-| [Testa lagerarkitektur — en strategi per lager](https://bth-mvc.github.io/teacher/kmom04-1-test-strategy/slides.html) | Vad och hur man testar i varje lager |
-| [Vitest mock och spy — isolera services](https://bth-mvc.github.io/teacher/kmom04-2-vitest-mock-spy/slides.html) | `vi.fn()`, `vi.spyOn()`, setup och teardown |
-| [CI med kodkvalitet](https://bth-mvc.github.io/teacher/kmom04-3-ci-quality/slides.html) | GitHub Actions, coverage-rapporter, ESLint som gate |
-| [Shift left — CI börjar lokalt](https://bth-mvc.github.io/teacher/kmom04-4-shift-left/slides.html) | husky, pre-push hooks, sonar-scanner med quality gate |
+| [About kmom04 — how the week fits together](https://bth-mvc.github.io/teacher/kmom04-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [Testing Layered Architecture](https://bth-mvc.github.io/teacher/kmom04-1-test-strategy/slides.html) | En teststrategi per lager, varför man inte mockar Mongoose, testpyramiden och vad coverage ska mäta |
+| [Vitest Mock and Spy](https://bth-mvc.github.io/teacher/kmom04-2-vitest-mock-spy/slides.html) | Isolera services i enhetstester: `vi.fn()`, `vi.mock()`, `vi.spyOn()`, simulerade fel, setup och teardown |
+| [CI with Code Quality](https://bth-mvc.github.io/teacher/kmom04-3-ci-quality/slides.html) | GitHub Actions, coverage-gränsen, e2e-jobbet med Bruno och varför ESLint-reglerna varnar i stället för att stoppa |
+| [Shift Left — CI Starts Locally](https://bth-mvc.github.io/teacher/kmom04-4-shift-left/slides.html) | Husky, pre-push hooken som kör samma kontroller som CI, och valfritt SonarQube med quality gate |
+| [Code Quality — Size and Complexity](https://bth-mvc.github.io/teacher/kmom04-5-code-quality/slides.html) | Varför stora funktioner och filer skadar, hur man räknar komplexitet, hur man delar upp koden och gränser att hålla sig till |
 
 ## Fördjupningsmaterial
 
@@ -62,6 +64,7 @@ Det här behöver du inte läsa för att klara veckans issues — issuetexten oc
 | supertest | [github.com/ladjs/supertest](https://github.com/ladjs/supertest) |
 | mongodb-memory-server | [github.com/typegoose/mongodb-memory-server](https://github.com/typegoose/mongodb-memory-server) |
 | ESLint rules | [eslint.org/docs/latest/rules](https://eslint.org/docs/latest/rules/) |
+| Bruno CLI | [docs.usebruno.com/bru-cli/overview](https://docs.usebruno.com/bru-cli/overview) |
 | GitHub Actions | [docs.github.com/en/actions](https://docs.github.com/en/actions) |
 
 {/*
@@ -86,7 +89,7 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 
 ## Inlämning
 
-1. Kör `npm run sonar` och jämför med din kmom03-scan. Notera förändringar i din redovisningstext.
+1. (Valfritt) Kör `npm run test:coverage` och sedan `npm run sonar`, så att SonarQube får färsk coverage. Jämför med en tidigare scan, till exempel den från kmom02: under **Activity** i SonarQube finns alla scanningar och deras siffror. Notera förändringar i din redovisningstext.
 2. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
 3. Skriv klart din redovisningstext i `report/kmom04.md` och ta bort platshållartexten.
 4. Verifiera att koden är ren innan du taggar:
@@ -157,31 +160,31 @@ I node-kursen rekommenderades det att inte mocka databasen — den lärdomen bä
 kmom04 är steget där den röda tråden från kmom01 formaliseras till en automatiserad kedja:
 
 ```
-Editor        SonarLint              → direkt feedback medan man skriver
-On-demand     npm run sonar          → manuell lokal scan mot SonarQube
-Pre-push      sonar-scanner hook     → automatisk gate innan push
-CI            ESLint + coverage      → gate i GitHub Actions
+Editor        ESLint + SonarQube for IDE → direkt feedback (förslag)
+Pre-push      check + test:coverage      → automatisk gate innan push (coverage från 04-50)
+CI            check + coverage + Bruno   → gate i GitHub Actions (Bruno-jobbet e2e)
+(valfritt)    npm run sonar / sonar:ci   → lokal SonarQube, on-demand eller i pre-push (04-60)
 ```
 
-### Pre-push hook med sonar-scanner
+### Pre-push hook: coverage (04-50) och sonar-scanner (valfri 04-60)
 
-`husky` hanterar git hooks i repot — det committas och fungerar på alla plattformar.
+`husky` hanterar git hooks i repot — det committas och fungerar på alla plattformar. Hooken kör `npm run check` från start. I 04-50 lägger studenten till `npm run test:coverage`, så att hooken kontrollerar samma sak som CI (tröskeln från 04-30); testerna körs då två gånger (några sekunder), vilket vi accepterar för att hålla hooken enkel. ESLint-reglerna från 04-40 är `warn` och stoppar inte pushen, medvetet. I den valfria 04-60 läggs scannern till; den behöver färsk `coverage/lcov.info`, som raden före skriver.
 
 ```bash
 # .husky/pre-push
-npm run typecheck
-npm run lint
+npm run check
+npm run test:coverage   # färsk coverage/lcov.info till SonarQube
 npm run sonar:ci
 ```
 
 ```bash
 # package.json
-"sonar:ci": "node --env-file=.env node_modules/sonarqube-scanner/bin/sonar-scanner.js"
+"sonar:ci": "bash scripts/sonar-scan.sh --if-running"   # npx sonarqube-scanner, ingen devDependency
 ```
 
-`sonar:ci` kör bara scanningen, utan `-Dsonar.qualitygate.wait=true` — pushen blockeras alltså inte om quality gate failar. Resultatet är informativt: studenten ser det i SonarQube-UI:t efteråt, samma resonemang som pre-push (inte pre-commit) i föregående stycke — friktion ska komma från `npm run check`, inte från ett externt verktyg som kan vara nere eller ge falska positiva.
+`sonar:ci` kör bara scanningen, utan `-Dsonar.qualitygate.wait=true` — pushen blockeras alltså inte om quality gate failar. Resultatet är informativt: studenten ser det i SonarQube-UI:t efteråt. Friktion ska komma från `npm run check` och coverage-gränsen, inte från en quality gate som ställer högre krav (80 % coverage på ny kod i hela `src/`) och som studenten inte har satt själv. Med `--if-running` kollar skriptet först `api/system/status` och hoppar över scanningen med en rad text om servern inte är uppe, så en push hänger aldrig på att SonarQube är startat.
 
-**Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. SonarLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
+**Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. SonarQube for IDE och ESLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
 
 **Varför inte SonarCloud i CI:** Kursen kör privata repos i en GitHub-organisation. SonarCloud är gratis enbart för publika repos — privata kräver betalkonto. ESLint med komplexitetsregler och coverage-trösklar är en seriös CI-gate i sig.
 
