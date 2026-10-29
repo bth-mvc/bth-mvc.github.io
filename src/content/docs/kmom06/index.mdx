@@ -10,20 +10,9 @@ import YouTube from '@components/YouTube.astro';
 
 Den här veckan bygger du intelligenta tjänster ovanpå börskopplingen från kmom05. Din server gör nu mer än att relay:a data — den analyserar prisflödet, reagerar på händelser och håller sin integration robust mot fel. Det är steget från "det fungerar" till "det fungerar även när den externa servern beter sig oförutsägbart."
 
-## Förberedelse: sänk täckningsgränsen
-
-Den här veckan handlar om robusthet, inte om tester. Issuena lägger till kod som dina tester inte når, så sänk gränsen från issue 04-30 till 50 % i `vitest.config.ts`. Då stoppar inte din pre-push hook dig medan du bygger. Testerna kommer tillbaka i projektet.
-
-```diff
-  thresholds: {
--   lines: 70,
-+   lines: 50,
-  },
-```
-
 ## Issues
 
-Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
+Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen. Den första, 06-10, börjar med att sänka täckningsgränsen, eftersom veckan handlar om robusthet och inte om tester.
 
 Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar — noteringar, frågor eller korta reflektioner om vad du lärde dig. Det hjälper dig att minnas och ger läraren inblick i din process. Stäng ett issue när du anser att det är klart.
 
