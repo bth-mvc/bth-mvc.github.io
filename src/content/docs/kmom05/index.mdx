@@ -195,7 +195,7 @@ Webhooks kräver att studentens server är nåbar. Tre alternativ utvärderades:
 
 - **Under utveckling:** mock-servern (05-10) kör lokalt och skickar webhooks till `localhost:3000`. Ingen tunnel behövs. Studenten implementerar HMAC-verifiering och webhook-hantering — fullt lärandemål.
 - **Mot live-börsen:** börsen pushar inget utan köar signerade webhooks per student. Studenten pollar `GET /webhooks/pending` och kvitterar med `POST /webhooks/pending/ack` efter hanteringen (en okvitterad webhook kommer igen). Signaturen (`sha256=<hex>` av `body`) verifieras med samma kod som vid push. Hemligheten hämtas från börsen med `GET /webhooks/secret`.
-- **Mocken gör båda:** den pushar och köar samma webhook, så pollern kan byggas mot mocken och idempotensen (06-10) får ett verkligt skäl: samma webhook kommer två gånger.
+- **Mocken gör båda:** den pushar och köar samma webhook, så pollern kan byggas mot mocken och idempotensen (06-20) får ett verkligt skäl: samma webhook kommer två gånger.
 - **En wallet per API-nyckel:** studentens app kopplar ett lokalt konto (`EXCHANGE_USER_EMAIL`) till börsens wallet; det kontots portfölj speglar börsens.
 - **Valfritt:** studenter som vill kan använda ngrok mot live-börsen, men börsen pushar inte, så det ger inget.
 
