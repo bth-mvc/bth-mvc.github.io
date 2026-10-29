@@ -45,14 +45,16 @@ Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utök
 
 ## Föreläsningar
 
-Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med robusthet-föreläsningen — den ger bakgrunden till varför idempotens och retry är nödvändigt.
+Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med introt, det visar hur veckans issues hänger ihop.
 
 | Titel | Om |
 |---|---|
 | [About kmom06 — how the week fits together](https://bth-mvc.github.io/teacher/kmom06-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
-| [Robusthet mot externa API:er](https://bth-mvc.github.io/teacher/kmom06-1-robustness/slides.html) | Retry, backoff, timeout, circuit breaker — mönster för att hantera opålitliga beroenden |
-| [Idempotens — design för upprepade anrop](https://bth-mvc.github.io/teacher/kmom06-2-idempotency/slides.html) | At-least-once delivery, idempotency keys, när och hur man lagrar webhook-state |
-| [Bakgrundstjänster i Express](https://bth-mvc.github.io/teacher/kmom06-3-background-services/slides.html) | Services som körs kontinuerligt, livscykelhantering, graceful shutdown |
+| [Robustness Against External APIs](https://bth-mvc.github.io/teacher/kmom06-1-robustness/slides.html) | Tillfälliga och permanenta fel, exponential backoff, Retry-After, en retry-hjälpare, jitter, timeout och circuit breaker som begrepp |
+| [Idempotency](https://bth-mvc.github.io/teacher/kmom06-2-idempotency/slides.html) | At-least-once delivery, idempotenta operationer, kolla först och spara sist, unikt index, idempotency keys |
+| [Background Work in a Web Server](https://bth-mvc.github.io/teacher/kmom06-3-background-services/slides.html) | Polling med en setTimeout-kedja, en monitor på prisflödet, fel utan anropare, start och graceful shutdown |
+| [The Life of an Order](https://bth-mvc.github.io/teacher/kmom06-4-order-lifecycle/slides.html) | En order som tillståndsmaskin, delvis fyllda ordrar, övergångar som bara går framåt, avbryt och kapplöpningen med en fill |
+| [Caching with a Time to Live](https://bth-mvc.github.io/teacher/kmom06-5-caching/slides.html) | Varför cacha, att välja TTL, spara promisen och inte värdet, behåll inte fel, vad som inte ska cachas |
 
 ## Fördjupningsmaterial
 
