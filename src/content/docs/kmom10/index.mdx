@@ -9,23 +9,15 @@ revision:
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
 
-Det examinerande kursmomentet. Du fördjupar och utökar börsklientappen som du byggt under kmom01–06 — inte ett nytt system, utan en meningsfull vidareutveckling av det befintliga. Projektet ska visa att du behärskar och kan motivera dina tekniska val, och att du kan ta kursens mönster ett steg längre på egen hand.
+Det examinerande kursmomentet. Du fördjupar och utökar börsklientappen som du byggt under kmom01–06 — inte ett nytt system, utan en vidareutveckling av det befintliga. Projektet ska visa att du behärskar och kan motivera dina tekniska val, och att du kan ta kursens mönster ett steg längre på egen hand.
 
 ## Grundkrav — betyg E
 
-Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera mot den riktiga börsen. Verifiera hela flödet end-to-end (registrering → order → SSE-uppdatering → webhook → portfölj/leaderboard), inte bara att varje enskild issue är stängd.
+Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera mot den riktiga börsen, så att din akronym syns på leaderboarden.
 
-Sedan bygger du en trading bot, **issue 10-10**: en bakgrundstjänst som bevakar prisflödet och lägger ordrar automatiskt när priset passerar en tröskel. Boten berör alla lager i arkitekturen: model, repository, service, controller, route och SSE-hook. Det är din första feature utan guidad kod: du designar schemat och skriver koden själv, med prisnotifieringarna från 06-40 som förebild. Botens ordrar sparas med `source: 'bot'` och en anledning, så att de syns med en bot-etikett på sidan **Ordrar**.
+Du skall bygga en trading bot, **issue 10-10**: en bakgrundstjänst som bevakar prisflödet och lägger ordrar automatiskt när priset passerar en tröskel. Boten berör alla lager i arkitekturen: model, repository, service, controller, route och SSE-hook. Det är din första feature utan guidad kod: du designar schemat och skriver koden själv.
 
-Frontenden har redan en **Trading Bots**-sida. Den låses upp när du lägger till `GET /api/bot` i `/api/doc`.
-
-För trading boten, besvara följande i redovisningstexten:
-
-- Hur du designade bot-schemat, vilka fält och varför
-- Hur boten avgör när den ska handla
-- Om boten handlar en gång per tröskel eller upprepade gånger, och varför du valde det
-- Hur du testade att boten fungerar
-- Vad du skulle förbättra om du hade mer tid
+Frontenden har redan en **Trading Bots**-sida. Den låses upp när du lägger till `GET /api/bot` i `/api/doc`. Issuen slutar med vad redovisningstexten ska ta upp om boten.
 
 ---
 
@@ -33,24 +25,24 @@ För trading boten, besvara följande i redovisningstexten:
 
 Det finns fyra valfria issues i kmom10. Varje issue du gör höjer betyget ett steg från E: ett ger D, två ger C, tre ger B och alla fyra ger A. Du väljer själv vilka och i vilken ordning, med ett undantag: 10-30 bygger på 10-20.
 
-| Issue | Namn | Vad du gör |
-|---|---|---|
-| 10-20 | `smarter-bot` | Boten reagerar på nyheter, avbryter sina egna ordrar som blivit liggande och har en cooldown och en maxposition |
-| 10-30 | `bot-strategy` | En egen strategi, som du kör på börsen och utvärderar med data, bland annat botens vinst och förlust. Kräver 10-20 |
-| 10-40 | `bot-tests` | Enhets- och integrationstester för boten, minst 70 % täckning för botens kod |
-| 10-50 | `optional-issues` | Minst tre av kursens valfria issues, gjorda och fungerande |
+| Issue | Namn              | Vad du gör                                                                                                         |
+| ----- | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 10-20 | `smarter-bot`     | Boten reagerar på nyheter, avbryter sina egna ordrar som blivit liggande och har en cooldown och en maxposition    |
+| 10-30 | `bot-strategy`    | En egen strategi, som du kör på börsen och utvärderar med data, bland annat botens vinst och förlust. Kräver 10-20 |
+| 10-40 | `bot-tests`       | Enhets- och integrationstester för boten, och täckningen för hela appen tillbaka på minst 70 %                     |
+| 10-50 | `optional-issues` | Minst tre av kursens valfria issues, gjorda och fungerande                                                         |
 
 **Betyget beror aldrig på hur mycket boten tjänar.** En strategi som förlorar pengar men är väl genomtänkt, mätt och ärligt utvärderad är lika bra som en som vinner. Leaderboarden visar resultatet, koden och texten visar hantverket.
 
 Varje issue har en egen lista med vad redovisningstexten ska ta upp. Har du gjort ett valfritt issue under kursens gång räknas det i 10-50, men kontrollera att det fortfarande fungerar.
 
-## Redovisning
+## Redovisningstext
 
 Se till att följande frågor besvaras i din redovisningstext i `report/kmom10.md`.
 
-1. För grundkravet och för varje betygshöjande issue du gjort, skriver du ett textstycke om ca 5–10 meningar där du beskriver vad du gjort och hur du tänkt. Poängsättningen tar sin start i din text så se till att skriva väl för att undvika poängavdrag. Använd rubriker så din text blir lätt att läsa.
+1. För grundkravet och för varje betygshöjande issue du gjort skriver du ett stycke under en egen rubrik, som besvarar frågorna i issuen. Bedömningen utgår från din text, så skriv tydligt vad du gjort och hur du tänkt.
 
-   **Missar du att skriva/dokumentera din lösning så blir det 0 poäng. Du kan inte komplettera en inlämning för att få högre betyg.**
+   **En del som saknar text räknas inte. Du kan inte komplettera en inlämning för att få högre betyg.**
 
 2. Skriv ett allmänt stycke om hur projektet gick att genomföra. Problem/lösningar/strul/enkelt/svårt/snabbt/lång tid, etc. Var projektet lätt eller svårt? Tog det lång tid? Vad var svårt och vad gick lätt? Var det ett bra och rimligt projekt för denna kursen?
 
@@ -64,11 +56,13 @@ Se till att följande frågor besvaras i din redovisningstext i `report/kmom10.m
 
 ---
 
-## Slutpresentation och redovisningsvideo
+## Slutpresentation med redovisningsvideo
 
-Du skall förbereda och utföra en slutpresentation av ditt projekt. Du kan läsa hur du kan förbereda dig i dokumentet "[Planera din slutpresentation](https://bth-node.github.io/studieguide/planera-din-slutpresentation/)".
+Spela in en redovisningsvideo som en slutpresentation av ditt arbete. [Läs om kraven på videon](/studieguide/presentationsvideo/).
 
-Spela in en redovisningsvideo och lägg länken till videon i din PR (redigera din PR och lägg in länken). Detta kan du göra dagen efter projektets deadline. Läs mer om hur du kan [spela in en redovisningsvideo med OBS](https://bth-node.github.io/studieguide/redovisningsvideo-spela-in/).
+Lägg länken till videon överst i din PR.
+
+Du kan lämna in videon dagen efter projektets deadline.
 
 ---
 
@@ -90,13 +84,11 @@ Alla kontroller ska passera — typecheck, lint, format och tester. Åtgärda ev
 npm run check-submission -- kmom10
 ```
 
-Issue-kontrollen kräver att du är inloggad i GitHub CLI (`gh auth login`). Annars hoppas den över, och då behöver du själv kontrollera att dina issues är stängda.
-
 5. Committa, tagga och pusha:
 
 ```bash
-git add .
-git commit -m "kmom10 done"
+git add report/kmom10.md
+git commit -m "Add kmom10 report"
 git tag v10.0.0
 git push origin main --tags
 ```
@@ -108,9 +100,6 @@ Taggen startar ett CI-flöde på GitHub, under fliken **Actions**. Det kör samm
 Behöver du uppdatera din inlämning efteråt? Committa ändringen och skapa en ny tagg med ökad patch-version, t.ex. `v10.0.1`, och pusha den. Flytta aldrig en tagg som redan är pushad.
 
 6. Öppna en pull request från `main` till `bth/submit/kmom10` i ditt repo. CI körs även på pull requesten — kontrollera att den blir grön där också.
+7. Lägg länken till din redovisningsvideo överst i PR:en. Har du inte spelat in den än, redigera PR:en och lägg till länken senast dagen efter deadline.
 
 Läraren läser din redovisningstext via `report/kmom10.md` i PR:en och bedömer vilka issues som är uppfyllda.
-
-
-
-
