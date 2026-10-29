@@ -10,6 +10,17 @@ import YouTube from '@components/YouTube.astro';
 
 Den här veckan bygger du intelligenta tjänster ovanpå börskopplingen från kmom05. Din server gör nu mer än att relay:a data — den analyserar prisflödet, reagerar på händelser och håller sin integration robust mot fel. Det är steget från "det fungerar" till "det fungerar även när den externa servern beter sig oförutsägbart."
 
+## Förberedelse: sänk täckningsgränsen
+
+Den här veckan handlar om robusthet, inte om tester. Issuena lägger till kod som dina tester inte når, så sänk gränsen från issue 04-30 till 50 % i `vitest.config.ts`. Då stoppar inte din pre-push hook dig medan du bygger. Testerna kommer tillbaka i projektet.
+
+```diff
+  thresholds: {
+-   lines: 70,
++   lines: 50,
+  },
+```
+
 ## Issues
 
 Arbeta igenom issues i ordning. Varje issue är ett steg framåt i applikationen.
@@ -18,18 +29,19 @@ Du är välkommen att skriva egna kommentarer i varje issue medan du arbetar —
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 06‑10 | `idempotent-webhooks` | Lagra webhook-ID:n, ignorera dubbletter — samma affär ska aldrig bokföras två gånger |
-| 06‑20 | `retry` | Exponential backoff vid 429 och nätverksfel mot börsen, respektera `Retry-After`-headern |
-| 06‑30 | `price-alerts` | Service som bevakar SSE-flödet och triggar notis när ett token-pris passerar ett tröskelvärde |
-| 06‑40 | `structured-logging` | Strukturerad loggning med Pino — logga händelser, aldrig känslig data (kopplar till A09 från kmom03) |
-| 06‑50 | `go-live` | Byt från mock till den riktiga börsen, verifiera att allt fungerar, hämta och visa leaderboard |
+| 06‑10 | `webhook-polling` | Hämta webhooks från börsens kö, kvittera dem och synka plånboken till det länkade kontot — börsen kan inte pusha till din dator |
+| 06‑20 | `idempotent-webhooks` | Lagra webhook-ID:n, ignorera dubbletter — samma affär ska aldrig bokföras två gånger |
+| 06‑30 | `retry` | Exponential backoff vid 429 och nätverksfel mot börsen, respektera `Retry-After`-headern |
+| 06‑40 | `price-alerts` | Service som bevakar SSE-flödet och triggar notis när ett token-pris passerar ett tröskelvärde |
+| 06‑45 | `leaderboard` | Hämta börsens ranking av alla studenter och mappa den till frontendens Leaderboard-sida |
+| 06‑50 | `go-live` | Byt från mock till den riktiga börsen, vidarebefordra hela flödet och verifiera att allt fungerar, med ditt eget namn på leaderboarden |
+| 06‑55 | `order-lifecycle` | Spara ordrarna och följ dem från öppen till fylld eller avbruten, och avbryt en öppen order. Låser upp handeln i vyn Handla |
 
 Valfria issues — gör dem om du vill utforska vidare. De kan räknas som utökningar i kmom10.
 
 | Issue | Namn | Vad du gör |
 |---|---|---|
-| 06‑55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) |
-| 06‑60 | `portfolio-analytics` | Aggregera antal affärer och handelsvolym per token via MongoDB aggregation pipeline |
+| 06‑60 | `history-news` | Prishistorik och nyheter från börsen, genom en cache. Låser upp historiken i vyn Handla |
 
 ## Föreläsningar
 
@@ -37,11 +49,10 @@ Titta igenom föreläsningarna innan du börjar med respektive issue. Börja med
 
 | Titel | Om |
 |---|---|
-| [Om kmom06 — så hänger veckan ihop](https://bth-mvc.github.io/teacher/kmom06-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
+| [About kmom06 — how the week fits together](https://bth-mvc.github.io/teacher/kmom06-0-intro/slides.html) | Vad du ska göra, varför, och hur issues bygger på varandra |
 | [Robusthet mot externa API:er](https://bth-mvc.github.io/teacher/kmom06-1-robustness/slides.html) | Retry, backoff, timeout, circuit breaker — mönster för att hantera opålitliga beroenden |
 | [Idempotens — design för upprepade anrop](https://bth-mvc.github.io/teacher/kmom06-2-idempotency/slides.html) | At-least-once delivery, idempotency keys, när och hur man lagrar webhook-state |
 | [Bakgrundstjänster i Express](https://bth-mvc.github.io/teacher/kmom06-3-background-services/slides.html) | Services som körs kontinuerligt, livscykelhantering, graceful shutdown |
-| [Strukturerad loggning i produktion](https://bth-mvc.github.io/teacher/kmom06-4-structured-logging/slides.html) | Pino, log levels, vad som loggas och vad som inte får loggas |
 
 ## Fördjupningsmaterial
 
@@ -51,23 +62,15 @@ Det här behöver du inte läsa för att klara veckans issues — issuetexten oc
 
 | Hör till | Titel | Varför |
 |---|---|---|
-| Issue 06-10 | [MDN — Idempotent](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent) | Förklarar idempotens-konceptet och varför det är viktigt i distribuerade system |
-| Issue 06-20 | [AWS — Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) | Förklarar varför enkel retry utan backoff skapar thundering herd-problem |
-| Issue 06-40 | [Pino dokumentation — Getting started](https://getpino.io/#/) | Strukturerad loggning med Pino — log levels, serializers, child loggers |
-
-**Referens** — Slå upp det du behöver när du behöver det. Det är så erfarna utvecklare arbetar.
-
-| Verktyg | Länk |
-|---|---|
-| Pino dokumentation | [getpino.io](https://getpino.io/#/) |
-| Pino API reference | [getpino.io/#/docs/api](https://getpino.io/#/docs/api) |
+| Issue 06-20 | [MDN — Idempotent](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent) | Förklarar idempotens-konceptet och varför det är viktigt i distribuerade system |
+| Issue 06-30 | [AWS — Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) | Förklarar varför enkel retry utan backoff skapar thundering herd-problem |
 
 {/*
 ## Quiz
 
 När du är klar med veckans issues gör du quizen som finns i Canvas.
 
-Quizen för kmom06 testar om du förstår vad idempotens är och varför det behövs för webhooks, hur exponential backoff fungerar och varför enkel retry utan backoff skapar problem, varför känslig data aldrig ska loggas, och vad "at least once delivery" innebär.
+Quizen för kmom06 testar om du förstår vad idempotens är och varför det behövs för webhooks, hur exponential backoff fungerar och varför enkel retry utan backoff skapar problem, och vad "at least once delivery" innebär.
 */}
 
 ## Redovisningstext
@@ -78,12 +81,12 @@ Punkterna nedan lyfter fram veckans viktigaste delar och kan hjälpa dig att kom
 
 - **Robusthet** — Vad kan gå fel i samspelet med börsen, och hur hanterar din app det?
 - **Prisnotifieringar** — Hur hänger kedjan ihop, från ett nytt pris till en notis hos användaren?
-- **Loggning** — Vad loggar du, vad låter du bli att logga, och varför?
+- **Inför projektet** — Vilket mönster från veckan tar du med dig till trading boten i kmom10?
 - Vad är din viktigaste insikt (TIL — Today I Learned) från veckan?
 
 ## Inlämning
 
-1. Kör `npm run sonar` och jämför med din kmom05-scan. Notera förändringar i din redovisningstext.
+1. (Valfritt) Kör `npm run sonar` och jämför med din förra scan. Notera förändringar i din redovisningstext.
 2. Stäng alla obligatoriska issues, och de valfria som du har gjort klart.
 3. Skriv klart din redovisningstext i `report/kmom06.md` och ta bort platshållartexten.
 4. Verifiera att koden är ren innan du taggar:
@@ -163,19 +166,9 @@ await this.processOrder(payload)
 await this.webhookLogRepository.save(webhookId)
 ```
 
-### Strukturerad loggning
+### Strukturerad loggning flyttad till ops-kursen (2026-10-27)
 
-```typescript
-// Rätt
-logger.info({ event: 'order_matched', tokenId, userId, amount }, 'Order matched')
-logger.warn({ event: 'webhook_duplicate', webhookId }, 'Duplicate webhook ignored')
-logger.error({ event: 'exchange_error', status: err.status }, 'Exchange API failed')
-
-// Fel — loggar aldrig
-logger.info({ apiKey, jwtToken, password })
-```
-
-Koppling till OWASP A09 från kmom03: en logg som läcker API-nycklar eller tokens är en säkerhetsbrist, inte bara dålig praxis.
+Issuet `structured-logging` och decket "Strukturerad loggning i produktion" är borttagna ur kmom06 för att ge en lättare sista vecka. Det mesta fanns redan i 03-70 (redaction) och 03-75 (`event`-fält), och loggning blir meningsfull först när loggarna samlas i en aggregator. Se `NEXT-COURSE.md`.
 
 ### Pedagogisk notering
 
@@ -185,15 +178,12 @@ Prisnotifieringstjänsten är det roligaste momentet: studenten ser sin egen not
 
 ### Quiz-mismatch (2026-06-24)
 
-Quizen nämner circuit breaker men det är inte en egen issue längre. Ändra frågan till "beskriv konceptet" (covered i 06-20:s bakgrundstext om exponential backoff) eller ta bort den.
-
-### Öppna frågor
-
-- Ska graceful shutdown vara ett eget issue? Det är viktigt (stäng SSE-anslutningar ordentligt vid `SIGTERM`) men kan också vara en del av issue 06-40 (logging/robusthet).
+Quizen nämner circuit breaker men det är inte en egen issue längre. Ändra frågan till "beskriv konceptet" (covered i 06-30:s bakgrundstext om exponential backoff) eller ta bort den.
 
 ### Lösta frågor
 
-- ~~Ska portfolio-analytics kopplas mot en ny vy i Svelte-frontenden?~~ Ja — implementerat som stats-sektion på Portfolio-sidan (06-60).
-- ~~Circuit breaker som valfri issue?~~ Borttagen (2026-06-25). Retry med backoff (06-20) täcker samma behov. Noterat i outside-scope.mdx.
+- ~~Ska graceful shutdown vara ett eget issue?~~ Nej (2026-10-27). Pollern startas och stoppas i 06-10; resten hör till ops-kursen.
+- ~~Ska portfolio-analytics kopplas mot en ny vy i Svelte-frontenden?~~ Ja, men issuet togs bort 2026-10-29: 06-55 blev obligatorisk (orderns livscykel, bron till kmom10) och 06-60 blev prishistorik och nyheter. Koden för `GET /api/portfolio/stats` finns kvar i `solution/`.
+- ~~Circuit breaker som valfri issue?~~ Borttagen (2026-06-25). Retry med backoff (06-30) täcker samma behov. Noterat i outside-scope.mdx.
 
 </details>

@@ -2,6 +2,7 @@
 title: 'kmom10: Projekt och examination'
 description: Fördjupa och utöka börsklientappen — visa att du behärskar och kan motivera dina tekniska val.
 revision:
+  2026-10-29: (B, mos) Grundkrav E med boten, fyra betygshöjande issues 10-20 till 10-50.
   2026-06-01: (A, mos) Första versionen.
 ---
 
@@ -10,81 +11,44 @@ import YouTube from '@components/YouTube.astro';
 
 Det examinerande kursmomentet. Du fördjupar och utökar börsklientappen som du byggt under kmom01–06 — inte ett nytt system, utan en meningsfull vidareutveckling av det befintliga. Projektet ska visa att du behärskar och kan motivera dina tekniska val, och att du kan ta kursens mönster ett steg längre på egen hand.
 
-## Grundkrav — betyg E och D
+## Grundkrav — betyg E
 
-Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera. Verifiera hela flödet end-to-end (registrering → orderläggning → SSE-uppdatering → webhook → portfölj/leaderboard) — inte bara att varje enskild issue är stängd i isolation. Sedan utökas appen med två konkreta nya features.
+Alla obligatoriska issues i kmom01–06 ska vara avslutade och börsklientappen ska fungera mot den riktiga börsen. Verifiera hela flödet end-to-end (registrering → order → SSE-uppdatering → webhook → portfölj/leaderboard), inte bara att varje enskild issue är stängd.
 
-### Trading bot
+Sedan bygger du en trading bot, **issue 10-10**: en bakgrundstjänst som bevakar prisflödet och lägger ordrar automatiskt när priset passerar en tröskel. Boten berör alla lager i arkitekturen: model, repository, service, controller, route och SSE-hook. Det är din första feature utan guidad kod: du designar schemat och skriver koden själv, med prisnotifieringarna från 06-40 som förebild. Botens ordrar sparas med `source: 'bot'` och en anledning, så att de syns med en bot-etikett på sidan **Ordrar**.
 
-Implementera en konfigurerbar trading bot — en bakgrundstjänst som bevakar prisflödet och lägger ordrar automatiskt när priströsklar korsas.
-
-Se **issue 10-10** för krav, endpoints, och steg-för-steg-approach. Boten berör alla lager i arkitekturen: model, repository, service, controller, route och SSE-hook. Det är din första feature utan guidad kod — du designar schemat och skriver implementationen själv.
-
-Frontenden har redan en **Trading Bots**-sida redo. Den låses upp när du lägger till `GET /api/bot` i `/api/doc`. API-dokumentationen visar dina bot-endpoints under "Examination".
+Frontenden har redan en **Trading Bots**-sida. Den låses upp när du lägger till `GET /api/bot` i `/api/doc`.
 
 För trading boten, besvara följande i redovisningstexten:
 
-- Hur du designade bot-schemat — vilka fält och varför
-- Hur boten avgör när den ska handla — din strategilogik
-- Om boten handlar en gång per tröskel eller upprepade gånger — och varför du valde det
+- Hur du designade bot-schemat, vilka fält och varför
+- Hur boten avgör när den ska handla
+- Om boten handlar en gång per tröskel eller upprepade gånger, och varför du valde det
 - Hur du testade att boten fungerar
 - Vad du skulle förbättra om du hade mer tid
 
 ---
 
-## Optionella krav — betyg C, B och A
+## Betygshöjande issues — betyg D, C, B och A
 
-Kraven bygger på varandra som en trappa: för betyg C krävs krav 1, för betyg B krävs krav 1 **och** krav 2, för betyg A krävs alla tre. Med "fristående" menas att kraven inte har några tekniska beroenden mellan varandra i koden — du kan implementera dem i valfri ordning — men för att nå ett högre betyg måste även de lägre kraven vara uppfyllda. Beskriv vad du gjort och varför i redovisningstexten.
+Det finns fyra valfria issues i kmom10. Varje issue du gör höjer betyget ett steg från E: ett ger D, två ger C, tre ger B och alla fyra ger A. Du väljer själv vilka och i vilken ordning, med ett undantag: 10-30 bygger på 10-20.
 
-### Krav 1 — Avancerad bot-strategi (betyg C)
+| Issue | Namn | Vad du gör |
+|---|---|---|
+| 10-20 | `smarter-bot` | Boten reagerar på nyheter, avbryter sina egna ordrar som blivit liggande och har en cooldown och en maxposition |
+| 10-30 | `bot-strategy` | En egen strategi, som du kör på börsen och utvärderar med data, bland annat botens vinst och förlust. Kräver 10-20 |
+| 10-40 | `bot-tests` | Enhets- och integrationstester för boten, minst 70 % täckning för botens kod |
+| 10-50 | `optional-issues` | Minst tre av kursens valfria issues, gjorda och fungerande |
 
-Bygg ut din trading bot med en mer sofistikerad strategi. Listan nedan är inspiration, inte en begränsning — har du en annan idé, beskriv strategin och implementera den, det räknas lika.
+**Betyget beror aldrig på hur mycket boten tjänar.** En strategi som förlorar pengar men är väl genomtänkt, mätt och ärligt utvärderad är lika bra som en som vinner. Leaderboarden visar resultatet, koden och texten visar hantverket.
 
-- **Glidande medelvärde** — håll koll på de senaste N priserna och köp när priset sjunker under snittet, sälj när det stiger över
-- **Cooldown** — vänta N sekunder efter en order innan boten får handla igen (förhindrar orderrus)
-- **Max position** — köp inte om du redan äger mer än X av en token
-- **Stop-loss** — sälj automatiskt om priset faller ett visst belopp under referenspriset (skyddar mot stora förluster)
-- **Take-profit** — stäng positionen automatiskt när du nått en målvinst
-- **Dollar-cost averaging** — köp för ett fast belopp med jämna tidsintervall, oavsett pris
-- **Portföljrebalansering** — håll en målvikt per token och handla när vikten avviker
-- **Prestandauppföljning** — logga varje bot-trade och beräkna total vinst/förlust
-- **Flera strategier** — låt användaren välja strategi vid konfiguration (t.ex. tröskel eller glidande medelvärde)
-
-Motivera ditt val och beskriv implementationen i redovisningstexten. Leaderboarden visar resultatet — koden visar hantverket.
-
-### Krav 2 — Valfria issues (betyg B)
-
-Under kmom05 och kmom06 fanns valfria issues. Implementera minst **två** av dem:
-
-| Issue | Namn | Vad du bygger | Synligt i klienten |
-|---|---|---|---|
-| 05-65 | `trade-history` | `GET /api/trades` med cursor-pagination, handelshistorik | Trades-sidan låses upp |
-| 06-55 | `order-history` | Visa användarens ordrar med status (pending/matched/cancelled) | Orders-sidan utökas med lista |
-| 06-60 | `portfolio-analytics` | `GET /api/portfolio/stats` — antal affärer och handelsvolym per token | Ny sektion på Portfolio-sidan |
-
-Har du redan gjort dem under kursens gång? Då räknas de — verifiera att de fungerar och beskriv dem i redovisningstexten. Varje ny endpoint ska läggas till i `/api/doc`.
-
-Har du gjort ytterligare valfria issues utöver de tre ovan (t.ex. 03-85 refresh tokens)? Beskriv gärna även dessa i redovisningstexten — det räknas som ett allmänt plus, men ersätter inte kravet på minst två av issuesna i tabellen.
-
-### Krav 3 — Kodkvalitet (betyg A)
-
-- ESLint med regler för `max-lines-per-function` och `complexity`
-- Tester för din trading bot: enhetstester för service med mockad repository, integrationstester med Supertest
-- Coverage-rapport synlig i SonarQube — ingen fast gräns, men du ska kunna motivera täckningsgraden
-- SonarQube-scan av din kod — noll nya blockers eller critical issues
-
-Dokumentera kvalitetsarbetet i redovisningstexten:
-
-- Vilka problem hittade verktygen (ESLint, SonarQube)?
-- Vad ändrade du — och hur?
-- Vad valde du att inte åtgärda, och varför?
-- Vilka delar av boten valde du att testa och varför? Hur påverkade testerna den totala täckningen som den visas i SonarQube?
+Varje issue har en egen lista med vad redovisningstexten ska ta upp. Har du gjort ett valfritt issue under kursens gång räknas det i 10-50, men kontrollera att det fortfarande fungerar.
 
 ## Redovisning
 
 Se till att följande frågor besvaras i din redovisningstext i `report/kmom10.md`.
 
-1. För varje krav du implementerat (grundkrav inklusive utökningar, och krav 1–3), skriver du ett textstycke om ca 5–10 meningar där du beskriver vad du gjort och hur du tänkt. Poängsättningen tar sin start i din text så se till att skriva väl för att undvika poängavdrag. Använd rubriker så din text blir lätt att läsa.
+1. För grundkravet och för varje betygshöjande issue du gjort, skriver du ett textstycke om ca 5–10 meningar där du beskriver vad du gjort och hur du tänkt. Poängsättningen tar sin start i din text så se till att skriva väl för att undvika poängavdrag. Använd rubriker så din text blir lätt att läsa.
 
    **Missar du att skriva/dokumentera din lösning så blir det 0 poäng. Du kan inte komplettera en inlämning för att få högre betyg.**
 
@@ -145,7 +109,7 @@ Behöver du uppdatera din inlämning efteråt? Committa ändringen och skapa en 
 
 6. Öppna en pull request från `main` till `bth/submit/kmom10` i ditt repo. CI körs även på pull requesten — kontrollera att den blir grön där också.
 
-Läraren läser din redovisningstext via `report/kmom10.md` i PR:en och bedömer vilka krav som är uppfyllda.
+Läraren läser din redovisningstext via `report/kmom10.md` i PR:en och bedömer vilka issues som är uppfyllda.
 
 
 
