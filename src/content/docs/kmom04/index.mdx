@@ -7,8 +7,17 @@ revision:
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
+import coverage from '@assets/mvc/04-coverage-login.png';
 
 Den här veckan testar du varje lager i lagerarkitekturen på rätt sätt och formaliserar kodkvalitet som en automatiserad kedja — från editorn till CI. Du kan redan Vitest + Supertest från node-kursen, men där testade du routes med logik direkt i dem. Nu har du tre distinkta lager och varje lager testas på sitt eget sätt.
+
+<Figure
+    src={coverage}
+    width={800}
+    height={290}
+    alt="Coverage-rapporten för login() med körda rader i grönt och en otestad gren i rött"
+    caption="Coverage-rapporten visar vilken kod testerna kör. Grenen för ett låst konto är röd: ingen test har provat den."
+/>
 
 ## Issues
 
