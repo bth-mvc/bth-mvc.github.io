@@ -7,8 +7,17 @@ revision:
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
+import market from '@assets/mvc/05-30-market.png';
 
 Den här veckan kopplar du din server som *klient* mot den gemensamma tokenbörsen — ett levande system där alla studenter på kursen är aktiva deltagare. Det är ett medvetet skifte: du implementerar inte längre vad läraren specificerar — du integrerar med ett system du inte kontrollerar. Tekniken är känd (REST, webhooks, SSE) men kontexten är ny och motivationen omedelbar: dina ordrar påverkar priser som alla andra studenter ser i realtid.
+
+<Figure
+    src={market}
+    width={800}
+    height={514}
+    alt="Sidan Marknad med börsens tokens och deras priser"
+    caption="Sidan Marknad visar tokens och priser från börsen, via ditt API."
+/>
 
 ## Issues
 

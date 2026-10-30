@@ -7,8 +7,17 @@ revision:
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
+import dashboard from '@assets/mvc/01-60-dashboard.png';
 
 Den här veckan startar du från kursens template-repo och sätter upp din devmiljö med Docker Compose. Du lär dig TypeScript-grunderna, konfigurerar Express i TypeScript och bygger de första domänspecifika REST-endpoints. Veckan avslutas med att du validerar miljövariabler med Zod — ett bibliotek du möter igen i kmom02 för att validera inkommande data.
+
+<Figure
+    src={dashboard}
+    width={600}
+    height={702}
+    alt="Dashboarden med statusrutor, prisgraf, alerts, innehav och senaste affärer"
+    caption="Dashboarden i börsklienten när kursen är klar. Varje sektion låses upp när ditt API har dess endpoint, och den här veckan låser du upp de två första."
+/>
 
 ## Kom igång
 

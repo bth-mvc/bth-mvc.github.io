@@ -7,8 +7,17 @@ revision:
 
 import Figure from '@components/CustomFigure.astro';
 import YouTube from '@components/YouTube.astro';
+import handla from '@assets/mvc/06-50-handla.png';
 
 Den här veckan bygger du intelligenta tjänster ovanpå börskopplingen från kmom05. Din server gör nu mer än att relay:a data — den analyserar prisflödet, reagerar på händelser och håller sin integration robust mot fel. Det är steget från "det fungerar" till "det fungerar även när den externa servern beter sig oförutsägbart."
+
+<Figure
+    src={handla}
+    width={800}
+    height={728}
+    alt="Sidan Handla med prisgraf, orderdjup, affärer och nyheter"
+    caption="Handla mot den riktiga börsen: prisgraf, orderdjup, senaste affärer och nyheter, live via ditt SSE-flöde."
+/>
 
 ## Issues
 
