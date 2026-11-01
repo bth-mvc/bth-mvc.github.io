@@ -168,7 +168,7 @@ I node-kursen rekommenderades det att inte mocka databasen — den lärdomen bä
 kmom04 är steget där den röda tråden från kmom01 formaliseras till en automatiserad kedja:
 
 ```
-Editor        ESLint + SonarQube for IDE → direkt feedback (förslag)
+Editor        ESLint                     → direkt feedback (förslag)
 Pre-push      check + test:coverage      → automatisk gate innan push (coverage från 04-50)
 CI            check + coverage + Bruno   → gate i GitHub Actions (Bruno-jobbet e2e)
 (valfritt)    npm run sonar / sonar:ci   → lokal SonarQube, on-demand eller i pre-push (04-60)
@@ -192,7 +192,7 @@ npm run sonar:ci
 
 `sonar:ci` kör bara scanningen, utan `-Dsonar.qualitygate.wait=true` — pushen blockeras alltså inte om quality gate failar. Resultatet är informativt: studenten ser det i SonarQube-UI:t efteråt. Friktion ska komma från `npm run check` och coverage-gränsen, inte från en quality gate som ställer högre krav (80 % coverage på ny kod i hela `src/`) och som studenten inte har satt själv. Med `--if-running` kollar skriptet först `api/system/status` och hoppar över scanningen med en rad text om servern inte är uppe, så en push hänger aldrig på att SonarQube är startat.
 
-**Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. SonarQube for IDE och ESLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
+**Varför inte pre-commit?** En pre-commit hook som blockerar på formateringsfel i kmom01 är frustrerande friktion innan studenten förstår varför. ESLint i editorn tar den rollen för löpande feedback. Pre-push är rätt nivå — koden är färdig nog att pushas och ska passera quality gate.
 
 **Varför inte SonarCloud i CI:** Kursen kör privata repos i en GitHub-organisation. SonarCloud är gratis enbart för publika repos — privata kräver betalkonto. ESLint med komplexitetsregler och coverage-trösklar är en seriös CI-gate i sig.
 

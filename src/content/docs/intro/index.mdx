@@ -39,7 +39,7 @@ Kursen är designad med ett par pedagogiska principer som styr upplägget.
 
 **En app, en börs, alla studenter.** Från kmom05 handlar du mot en gemensam tokenbörsen. Alla studenter ser varandras prisrörelser via SSE, och det finns ett leaderboard. Det är ett gemensamt system att förhålla sig till, inte en lokal mock.
 
-**En sammanhängande kvalitetskedja.** Kursen bygger upp en kedja av kvalitetsverktyg steg för steg: SonarLint i editorn (kmom02) → SonarQube on-demand (kmom01+) → sonar-scanner i pre-push hook (kmom04) → ESLint och kodtäckning i CI (kmom04). Du ser hur varje lager i kedjan fångar olika typer av problem.
+**En sammanhängande kvalitetskedja.** Kursen bygger upp en kedja av kvalitetsverktyg steg för steg: ESLint i editorn → `npm run check` och kodtäckning i pre-push hook (kmom04) → samma kontroller i CI (kmom04), med SonarQube lokalt som valfritt spår. Du ser hur varje lager i kedjan fångar olika typer av problem.
 
 **Projektet är applikationen.** I kmom10 bygger du en trading bot som använder SSE-prisflödet för att automatiskt lägga ordrar baserat på en strategi du väljer och implementerar. Det är ingen separat projektuppgift — det är nästa feature i appen du redan byggt.
 
