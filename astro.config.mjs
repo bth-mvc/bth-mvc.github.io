@@ -62,6 +62,7 @@ export default defineConfig({
 				{ slug: 'kmom05' },
 				{ slug: 'kmom06' },
 				{ slug: 'kmom10' },
+				{ label: 'Torsdagsgenomgångar', link: '/lecture/' },
 				{
 					label: 'Studieguide',
 					collapsed: true,

@@ -2,6 +2,17 @@
 
 Byggd med Starlight & Astro.
 
+## Torsdagsgenomgångar (`public/lecture/`)
+
+Andreas genomgångar ligger i `public/lecture/`, en mapp per genomgång, och listas på
+`public/lecture/index.html` (https://bth-mvc.github.io/lecture/, "Torsdagsgenomgångar" i menyn).
+Så lägger du till en:
+
+1. Skapa en mapp, t.ex. `public/lecture/<amne>/`, och lägg `slides.html` (eller PDF m.m.) där.
+2. Kopiera ett kort i `public/lecture/index.html` överst i listan och ändra länk, rubrik och
+   beskrivning.
+3. Pusha till `main`; `.github/workflows/pages.yml` publicerar.
+
 Klona repot och gör:
 
 ```

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="monokai">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript under the hood, the skeleton and Docker Sandboxes</title>
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.css">
+
+<slide title>
+# Gott och blandat
+## TypeScript, Zod and Docker Sandboxes
+</slide>
+
+<slide>
+# Quick recap: why types?
+
+* JavaScript has no types: a variable can hold anything
+* TypeScript lets us promise the compiler what the data looks like
+* Fewer surprises: a value of the wrong type is caught **before** we run the code
+* But: types only cover code and hard-coded values
+</slide>
+
+<slide>
+# Data from outside has no type
+
+* `req.body`, API responses and database rows arrive at runtime
+* The compiler cannot know what a client sends
+* **Zod** validates the data at runtime and gives it a type
+* Zod is a TypeScript-first validation tool
+
+**The red thread:** one single source of truth. Write the schema once, let the type be derived.
+</slide>
+
+<slide>
+# TypeScript types and Zod
+
+| TypeScript | Zod |
+|---|---|
+| `string` | `z.string()` |
+| `number` | `z.number()` |
+| `boolean` | `z.boolean()` |
+| `null` / `undefined` | `z.null()` / `z.undefined()` |
+| `'open' \| 'filled'` | `z.enum(['open', 'filled'])` |
+| `string[]` | `z.array(z.string())` |
+| `{ token: string }` | `z.object({ token: z.string() })` |
+
+
+</slide>
+
+
+<slide>
+# Value, type and `typeof`
+
+`src/models/User.ts`
+
+1. `userSchema` is a **value** that exists when the program runs
+2. `typeof userSchema` is the **type** of that value
+3. `InferSchemaType&lt;typeof userSchema>` is a **derived type**
+
+`InferSchemaType` takes the *type of* a schema, not the schema itself. That is why `typeof` is needed.
+</slide>
+
+
+<slide>
+# Two kinds of `typeof`
+
+```typescript
+const x = 5
+
+console.log(typeof x)  // JavaScript, runs: "number"
+type T = typeof x      // TypeScript, compile time: number
+```
+
+* In an expression (`console.log(...)`, `if (typeof x === 'string')`) it is JavaScript
+* After `type ... =`, inside `<...>` or after a colon it is TypeScript
+* The type line is gone in `dist/`
+</slide>
+
+
+
+<slide>
+# The same pattern in Zod
+
+```typescript
+const schema = z.object({ token: z.string() })
+
+export type Params = z.infer&lt;typeof schema>
+```
+
+* `z.infer` does for Zod what `InferSchemaType` does for Mongoose
+</slide>
+
+<slide>
+# Three tools, one idea
+
+* Mongoose schema, Zod schema, TypeScript types
+* It is fine if it feels messy to keep track of all three
+* We choose a starting point (the schema) and derive the rest from it
+* Never write the type in more than one place
+</slide>
+
+<slide>
+# `Pick` and `Omit`
+
+```typescript
+type A = Pick&lt;Portfolio, 'balance'>
+# a = {
+#  "balance": 100,
+# }
+type B = Pick&lt;Portfolio, 'balance' | 'holdings'>
+# b = {
+#  "balance": 100,
+#  "holdings": [...]
+# }
+type C = Omit&lt;Portfolio, 'holdings'>
+# c = {
+#  "balance": 100,
+#  "totalValue": 0
+# }
+```
+
+* `Pick` looks up the key and type in the source and copies it
+* Change `balance` to `string` and `A` follows automatically
+* Code that expects `number` now fails to compile, which is the point
+* `Omit` is the opposite: everything except the listed keys
+</slide>
+
+<slide>
+# `interface` versus `type`
+
+* The real difference is **declaration merging**
+* Two `interface` with the same name become one
+* That is how we add `userId` to Express's own `Request`
+
+`src/types/express.d.ts`
+
+</slide>
+
+<slide>
+# How does the merging happen?
+
+1. `@types/express` declares a global `Express.Request`
+2. `express.d.ts` declares `interface Request` in the same namespace
+3. `tsconfig.json` includes `src/**/*`, so the file is read and the two merge
+
+* No `import` or `export` in the file, otherwise it becomes a module and the merge stops
+* Type-check time only: at runtime `requireAuth` sets `req.userId`
+</slide>
+
+<slide>
+# What only `type` can do
+
+* Name a union: `type OrderStatus = 'open' | 'filled'`
+* Tuples and primitive aliases
+* Expressions: mapped and conditional types
+* `UserDoc` is a `type` because it is an expression
+* A `type` cannot be merged: the same name twice is an error
+
+For plain object shapes both work. Consistency in the project matters more.
+</slide>
+
+<slide>
+# Special types: how much does the compiler know?
+
+| Type | Compiler knows? | Meaning |
+|---|---|---|
+| `any` | No, stops checking | Turns the type system off |
+| `unknown` | No, but demands a check | The safe alternative to `any` |
+| `never` | The value cannot exist | Never returns, impossible branch |
+| `void` | Return value ignored | Returns nothing useful |
+</slide>
+
+<slide>
+# `any` is contagious
+
+* No checks at all, everything is allowed
+* One `any` in an expression often makes the result `any`
+* `JSON.parse` returns `any`, so it sneaks in
+* Once it starts, it spreads until TypeScript is meaningless in the project
+* That is when developers learn to dislike TypeScript
+</slide>
+
+<slide>
+# `unknown`: check first, then use
+
+```typescript
+function parse(input: unknown) {
+  input.toUpperCase()          // error: 'input' is unknown
+  if (typeof input === 'string') {
+    input.toUpperCase()        // ok, narrowed to string
+  }
+}
+```
+
+* `req.body` and external API responses are really `unknown`
+* `zod.safeParse` is a type check that turns `unknown` into a real type
+</slide>
+
+
+<slide>
+# `never` and exhaustive checks
+
+```typescript
+function throwError(message: string): never {
+    throw new Error(message);
+}
+function infiniteLoop(): never {
+    while (true) {
+        // Code that never exits
+    }
+}
+```
+
+</slide>
+
+<slide>
+# `never` and exhaustive checks
+
+```typescript
+type Status = 'open' | 'filled'
+function label(s: Status) {
+  switch (s) {
+    case 'open': return 'Open'
+    case 'filled': return 'Filled'
+    default: { const _x: never = s }
+  }
+}
+```
+
+</slide>
+
+
+
+<slide>
+# `never` versus `void`
+
+```typescript
+function logError(message: string): void {
+  console.log(message)
+}
+```
+
+* `void`: returns, but the value is uninteresting
+* `never`: never returns at all
+* A function that always throws is `never`. One without a `return` is `void`
+</slide>
+
+
+
+<slide>
+# Type assertions: `as`
+
+* `as` means "treat this value as type X"
+* It changes only what the compiler believes
+* Nothing is checked or converted at runtime, and it is gone in `dist/`
+* With `unknown` + `safeParse` we **prove** the type. With `as` we **claim** it
+
+`as const` is something else: it freezes an object into literals.
+</slide>
+
+<slide>
+# What does this line do?
+
+`src/routes/auth.test.ts`
+
+```typescript
+const cookies =
+  res.headers['set-cookie'] as unknown as string[]
+```
+
+**Question:** why do we need `as unknown as`, and who is wrong here?
+</slide>
+
+
+<slide title>
+# Reading the skeleton critically
+## Code that compiles is not the same as code that is right
+</slide>
+
+<slide>
+# `req.userId!`
+
+* The field is `userId?: string`, so `string | undefined`. The service wants `string`
+* `!` means "trust me, it is not undefined": compile time only, checks nothing
+* TypeScript knows nothing about `requireAuth`
+* Forget `requireAuth` on a route and `undefined` flows on silently
+
+**Safer:** a guard, `if (!req.userId) throw new UnauthorizedError()`, or an `AuthedRequest` type.
+</slide>
+
+
+<slide>
+# `spaFallback`
+
+```typescript
+export function spaFallback(req, res, next) {
+  if (req.path.startsWith('/api/') ||
+      req.path.startsWith('/health'))
+    return next(new NotFoundError(req.path))
+  res.sendFile('client/dist/index.html', { root: '.' })
+}
+```
+
+* Without the guard, `GET /api/hej` returns the SPA with status 200
+* The client expects JSON, gets HTML, and shows a confusing parse error
+* The guard catches nothing: it passes on to a JSON 404
+</slide>
+
+<slide>
+# Read it critically
+
+* `startsWith('/health')` also matches `/healthcheck` and `/health-tips`
+* `startsWith('/api/')` with a slash does not match `/api`
+* The fallback only handles GET. A POST to an unknown route goes another way
+
+</slide>
+
+<slide>
+# Test files in `src/`: yes or no?
+
+* **Co-locate:** the test sits next to the code, easy to find, moved and deleted together
+* Vitest finds them anywhere
+* The requirement: keep them out of the build, `tsconfig.build.json` excludes `**/*.test.ts`
+* **Separate `test/` folder:** keeps `src` clean but needs a parallel structure
+
+**Discussion:** where does an end-to-end test of a route belong, compared to a unit test of a service?
+</slide>
+
+<slide title>
+# Containers, Docker Sandboxes and microVMs
+## Isolation for code you do not trust
+</slide>
+
+
+<slide>
+# The problem: AI agents on your machine
+
+* Coding agents run on developers' own computers
+* They need a real environment: install, test, build images, `docker compose`
+* Without a sandbox it is fast but risky
+* Containers share the host kernel: fine for local MongoDB, not for **untrusted** code
+</slide>
+
+<slide>
+# The blast radius
+
+> "One rm -rf, one leaked .env, one rogue network call, and the blast radius is your entire machine."
+</slide>
+
+<slide>
+# Why Docker built Sandboxes
+
+* **Full VMs:** strong isolation, slow start, heavy
+* **Containers:** fast, but Docker-in-Docker needs elevated rights that undermine isolation
+* **No sandbox:** a risk
+</slide>
+
+<slide>
+# What Docker built: a microVM per session
+
+1. Own kernel, a hardware boundary like a real VM
+2. A private Docker daemon inside the VM: `docker build` and `docker compose` without mounting the host socket
+3. No way back to the host: files, network and secrets are decided **before** the run
+</slide>
+
+<slide>
+# Not the agent's decision
+
+* Disposable: delete the sandbox, nothing to clean up
+
+> "An LLM deciding its own security boundaries is not a security model."
+</slide>
+
+
+<slide>
+# What is a microVM?
+
+* A VM with almost all legacy hardware emulation removed
+* What is left: CPU, memory, a few virtio devices, a small monitor, no firmware
+* VM isolation at nearly container speed: start in hundreds of ms, a few MB overhead
+* A kernel bug stays in the guest. Stronger, but not absolute
+
+<reference>[What is a microVM](https://miget.com/blog/what-is-a-microvm)</reference>
+</slide>
+
+<slide>
+# Container, microVM, VM
+
+| | Container | MicroVM | VM |
+|---|---|---|---|
+| Kernel | Shared with host | Own | Own |
+| Boundary | Namespaces + cgroups | Hardware | Hardware |
+| Start | Milliseconds | Hundreds of ms | Seconds to minutes |
+| Memory overhead | Negligible | Small | Large |
+</slide>
+
+
+<slide>
+# Honest summary
+
+* MicroVMs do not replace `docker compose` for ordinary development
+* The driver is isolating untrusted code, for example AI-generated
+* What we do with Compose is still the right tool for our task
+</slide>
+
+<slide>
+# Summary
+
+1. Derived types (`z.infer`, `InferSchemaType`, `Pick`) give one source of truth
+2. `unknown` forces a check, `any` lets everything through, `never` catches the cases you forgot
+3. `!` and `as` are promises to the compiler, not checks
+4. Read the skeleton critically: it compiling is not the same as it being right
+</slide>
+
+<slide reference-summary>
+# References
+</slide>
+
+<slide title>
+# The end
+</slide>
+
+<slide></slide>
+
+<script src="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.js"></script>
+</html>

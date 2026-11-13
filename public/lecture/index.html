@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="sv">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MVC-kursen — Torsdagsgenomgångar</title>
+<meta name="description" content="Andreas torsdagsgenomgångar i MVC-kursen vid BTH">
+<link rel="icon" href="leaf.png" type="image/png">
+<style>
+  /* Colors from the course website (bth-mvc.github.io, src/styles/dbwebb.css). */
+  :root {
+    --accent: #5f007f;
+    --accent-low: #ddb8e2;
+    --accent-bg: #f3e6f7;
+    --text: #151a13;
+    --text-muted: #4f5c4d;
+    --line: #bdc4bb;
+    --line-light: #eaf0e8;
+    --bg: #ffffff;
+    --bg-alt: #f4f7f3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #cca0d7;
+      --accent-low: #5f007f;
+      --accent-bg: #2a1830;
+      --text: #eaf0e8;
+      --text-muted: #bdc4bb;
+      --line: #4f5c4d;
+      --line-light: #303c2d;
+      --bg: #151a13;
+      --bg-alt: #1f2a1c;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  header { background: var(--bg-alt); border-bottom: 3px solid var(--accent); }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 1.75rem; display: flex; align-items: center; gap: 1.25rem; }
+  .header-inner img { width: 56px; height: 56px; flex-shrink: 0; }
+  header h1 { font-size: 1.8rem; font-weight: 700; line-height: 1.2; }
+  header p { color: var(--text-muted); margin-top: 0.3rem; }
+  main { max-width: 900px; margin: 2.25rem auto; padding: 0 1.5rem; }
+  .kmom { margin-bottom: 2.5rem; }
+  .kmom-header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 0.25rem; padding-left: 0.75rem; border-left: 4px solid var(--accent); }
+  .kmom-header h2 { font-size: 1.2rem; font-weight: 700; }
+  .kmom-header span { color: var(--text-muted); font-size: 0.85rem; }
+  .lecture-grid { display: grid; margin-top: 0.5rem; border-top: 1px solid var(--line); }
+  .lecture-card { display: block; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--line-light); border-left: 4px solid transparent; text-decoration: none; color: inherit; transition: background 0.15s, border-color 0.15s; }
+  .lecture-card:hover, .lecture-card:focus-visible { background: var(--accent-bg); border-left-color: var(--accent); }
+  .lecture-card h3 { font-size: 0.95rem; font-weight: 600; color: var(--accent); }
+  .lecture-card:hover h3 { text-decoration: underline; }
+  .lecture-card p { font-size: 0.85rem; color: var(--text-muted); }
+  footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem; border-top: 1px solid var(--line-light); }
+  footer a { color: var(--accent); }
+</style>
+
+<!--
+  Torsdagsgenomgångar: Andreas genomgångar, en mapp per genomgång under public/lecture/.
+
+  Lägga till en genomgång:
+  1. Skapa en mapp, t.ex. public/lecture/<amne>/, och lägg slides.html (eller PDF m.m.) där.
+     Ikonen i en htmlslides-fil: <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  2. Kopiera ett kort (<a class="lecture-card" ...>) nedan, överst i listan (nyast först),
+     och ändra länk, rubrik och beskrivning.
+  3. Pusha till main. Webbplatsen publiceras av .github/workflows/pages.yml,
+     sidan hamnar på https://bth-mvc.github.io/lecture/
+-->
+
+<header>
+  <div class="header-inner">
+    <img src="leaf.png" alt="">
+    <div>
+      <h1>MVC-kursen — Torsdagsgenomgångar</h1>
+      <p>Andreas genomgångar på torsdagar, nyast först. Navigera med piltangenter, tryck ? för hjälp. Ctrl+P sparar som PDF.</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="kmom">
+    <div class="kmom-header">
+      <h2>Genomgångar</h2>
+    </div>
+    <div class="lecture-grid">
+      <a class="lecture-card" href="typescript-zod-sandboxes/slides.html">
+        <div>
+          <h3>Gott och blandat: TypeScript, Zod and Docker Sandboxes</h3>
+          <p>Typer i kod och data utifrån, typeof, Pick och Omit, interface och type, any, AI-agenter i Docker Sandboxes</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>MVC-kursen &mdash; BTH &middot; <a href="https://bth-mvc.github.io/">Kurswebbplatsen</a> &middot; <a href="https://bth-mvc.github.io/teacher/">Föreläsningar</a> &middot; Gjort med <a href="https://gitlab.com/mikael-roos/htmlslides">htmlslides</a></footer>
+</html>
