@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="monokai">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security in practice, bcrypt and regex</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.css">
+
+<slide title>
+# Security in practice
+## Site and origin, bcrypt and everyday regex
+</slide>
+
+<slide>
+# Today
+
+| | Topic |
+|---|---|
+| 1 | The evil pages: CSRF and CORS live |
+| 2 | Site versus origin |
+| 3 | Helmet and CSP: why is security not the default? |
+| 4 | bcrypt: where is the salt, and what is pepper? |
+| 5 | Regex for everyday use |
+| 6 | Questions and summary |
+</slide>
+
+<slide>
+# How is it going?
+
+* Something extra hard in this week's issues?
+</slide>
+
+<slide>
+# The red thread
+
+**The browser is the one that enforces the rules.**
+
+* CORS, SameSite, CSP and most Helmet headers are instructions from the server to the browser
+* The server cannot force anyone, and `curl` does not care
+* They protect the **user** against another site, not the API against an attacker with a script
+</slide>
+
+<slide>
+# "Can't the attacker build their own browser?"
+
+* Yes, but it does not help
+* The target is a **third party**: a legitimate, logged-in user
+* The victim's browser holds the cookie, so the victim's browser must do the work
+* The attacker has to get the victim to open a page in their **normal** browser
+
+The rules stop a legitimate user's browser from being used as a weapon.
+</slide>
+
+<slide>
+# Question
+
+If an attacker can run `curl` against my API, what does CORS protect?
+
+* Against the attacker: nothing
+* It stops another page from reading the logged-in **user's** data through the user's browser
+</slide>
+
+<slide title>
+# The evil pages
+## CSRF and CORS, live
+</slide>
+
+<slide>
+# Two different attacks
+
+| | CSRF | CORS |
+|---|---|---|
+| Full name | Cross-Site Request Forgery | Cross-Origin Resource Sharing |
+| The other site wants to | **do** something as you | **read** your data |
+| Stopped by | `SameSite` | CORS |
+| Demo | `evil.html` | `evil-cors.html` |
+
+For each: **1)** the goal, **2)** how (demo), **3)** the defense.
+</slide>
+
+
+<slide>
+# CSRF: what the attacker wants
+
+* Make your browser perform an action on a site where you are logged in
+* Before `SameSite`: a harmless-looking form whose `action` points to another site
+* The browser attaches **your** cookie for that site
+* The site sees a request from a logged-in user and performs it
+</slide>
+
+<slide>
+# What `evil.html` does
+
+```html
+&lt;form id="csrfForm" method="GET">&lt;/form>
+```
+
+```js
+form.action = 'http://localhost:3000/api/portfolio'
+form.submit()
+```
+
+* An ordinary page navigation to your API
+* The browser sends cookies for the target, if the rules allow it
+</slide>
+
+<slide>
+# Demo: `evil.html`
+
+1. Log in on `localhost:3000` with `SameSite=Lax`
+2. Open `http://127.0.0.1:8080/evil.html`, press "send now"
+3. The cookie follows, you see your portfolio as JSON
+4. Switch to `strict`, restart, log in again, repeat: **401**
+
+**Network tab:** is `Cookie: token=...` in the request headers or not? That is the whole demo.
+</slide>
+
+<slide>
+# Beware: cache and old cookies
+
+* `SameSite` is set on the cookie **at login**. Changed code does not change the cookie you already have
+* Log out and in again, or delete the cookie in DevTools (Application → Cookies)
+* Turn on **Disable cache** in the Network tab
+* Still odd? One private window, or one browser, per setting
+</slide>
+
+<slide>
+# `Lax`, `Strict` and `None`
+
+| Value | Cookie sent cross-site |
+|---|---|
+| `Strict` | Never |
+| `Lax` | Only top-level navigation with `GET` (a link, a GET form) |
+
+* `Lax` blocks `POST`, `PUT`, `DELETE` and background requests from other sites
+* Chrome and Edge default to `Lax`. Firefox and Safari do not. Set it explicitly
+</slide>
+
+<slide>
+# Be honest about the demo
+
+* The attacker's page **does not see** the response, you do
+* Real CSRF is about **doing** something: buy, change password
+* That is why changes use `POST`/`PATCH`/`DELETE`, never `GET`
+* The demo uses `GET` because it is easy to see
+
+**The price of `Strict`:** a link from an email arrives without the cookie, you look logged out until you reload.
+</slide>
+
+<slide>
+# CORS: what the attacker wants
+
+* **Read** your data on a site where you are logged in
+* JavaScript on another page fetches your portfolio with your cookie
+* Reads the response and sends it on to the attacker
+* Unlike CSRF, getting something done is not enough. The attacker wants the response
+</slide>
+
+<slide>
+# What `evil-cors.html` does
+
+```js
+const res = await fetch(
+  'http://localhost:3000/api/portfolio',
+  { credentials: 'include' },
+)
+const text = await res.text()
+```
+
+* Succeeds: the data is shown in red, "the server leaked data"
+* The browser throws: green, "blocked by CORS"
+</slide>
+
+<slide>
+# Demo: `evil-cors.html`
+
+1. Start with reflected CORS, `origin: true`
+2. Open `http://localhost:8080/evil-cors.html`, "send now": the data leaks
+3. Response headers:
+
+```http
+Access-Control-Allow-Origin: http://localhost:8080
+Access-Control-Allow-Credentials: true
+```
+
+The server **mirrored** the attacker's origin and said cookies are fine.
+</slide>
+
+<slide>
+# The fix: a list of origins
+
+```ts
+app.use(cors({
+  origin: [`http://localhost:${process.env.PORT ?? '3000'}`],
+  credentials: true,
+}))
+```
+
+* Now the browser blocks the **reading**, with a CORS error in the console
+</slide>
+
+<slide>
+# What CORS does not do
+
+* **The request was still sent**, and the server answered. Look in the Network tab
+* CORS stops the page's JavaScript from reading, so it is no CSRF protection
+* `localhost:8080` is the **same site** as `localhost:3000`: the cookie is sent even with `Strict`
+* Here only the CORS list protects
+* Our own client is same-origin, CORS is never used for it
+</slide>
+
+<slide title>
+# Site versus origin
+## Why did the demos behave the way they did?
+</slide>
+
+<slide>
+# The definitions
+
+**Origin** = scheme + host + port. All three must match.
+
+**Site** = scheme + registrable domain (eTLD+1). The port is **not** included.
+
+* `SameSite` uses **site** to decide if the cookie follows
+* CORS uses **origin** to decide if another page may read
+</slide>
+
+<slide>
+# Versus `http://localhost:3000`
+
+| URL | Origin? | Site? | Why |
+|---|---|---|---|
+| `…:3000/api` | yes | yes | only the path |
+| `http://localhost:8080` | **no** | **yes** | port: origin only |
+| `http://127.0.0.1:3000` | no | **no** | another host |
+| `https://localhost:3000` | no | no | another scheme |
+| `http://evil.example` | no | no | another domain |
+</slide>
+
+<slide>
+# Versus `shop.example.se` (1/2)
+
+| URL | Origin? | Site? |
+|---|---|---|
+| `https://shop.example.se/cart` | yes | yes |
+| `https://shop.example.se:8443` | **no** | **yes** |
+| `https://api.example.se` | **no** | **yes** |
+| `https://example.se` | **no** | **yes** |
+
+Same registrable domain, `example.se`, so the same site.
+</slide>
+
+<slide>
+# Versus `https://shop.example.se` (2/2)
+
+| URL | Origin? | Site? |
+|---|---|---|
+| `http://shop.example.se` | no | no |
+| `https://example.com` | no | no |
+| `https://shop-example.se` | no | no |
+| `https://shop.example.se.evil.com` | no | no |
+
+The **end** of the name decides the site.
+</slide>
+
+<slide>
+# Host, domain and registrable domain
+
+* **Host**: the whole name between scheme and port. A domain name or an IP address
+* **Domain**: a name in DNS. `student.bth.se`, `bth.se` and `se` are all domains
+* **Registrable domain** (eTLD+1): the part you can buy, `bth.se`
+* Origin compares the whole **host**. Site compares only the **registrable domain**
+</slide>
+
+<slide>
+# Origin and site, per URL
+
+| URL | Origin | Site |
+|---|---|---|
+| `http://student.bth.se:3000` | `http://student.bth.se:3000` | `http://bth.se` |
+| `http://bth.se` | `http://bth.se` | `http://bth.se` |
+| `https://api.dinbank.se` | `https://api.dinbank.se` | `https://dinbank.se` |
+| `http://localhost:3000` | `http://localhost:3000` | `http://localhost` |
+| `http://127.0.0.1:3000` | `http://127.0.0.1:3000` | `http://127.0.0.1` |
+
+The origin always has a port (default if not written), the site never.
+</slide>
+
+<slide>
+# Two questions, two mechanisms
+
+| Question | Mechanism | Protects against |
+|---|---|---|
+| May the cookie follow the request? | `SameSite` | CSRF |
+| May the other page **read** the response? | CORS | Data leak |
+
+* A request can be **same-site** (cookie sent) but **cross-origin** (CORS applies)
+* That is exactly what `evil-cors.html` shows
+</slide>
+
+
+<slide title>
+# Helmet and CSP
+## Why is security not the default?
+</slide>
+
+<slide>
+# What Helmet protects against
+
+| Header | Against |
+|---|---|
+| CSP | XSS: injected script runs |
+| Frame options | Clickjacking: our page hidden in a frame |
+| HSTS | Downgrade from HTTPS to HTTP |
+| `nosniff` | The browser guessing the wrong file type |
+| `Referrer-Policy` | URLs leaking to other sites |
+</slide>
+
+<slide>
+# Why opt-in, not opt-out?
+
+**The web is older than the security rules.**
+
+* Strict defaults would break millions of existing sites overnight
+* A site that stops working is worse for browser vendors than a site that is vulnerable
+* The browser cannot know what your site needs, only you do
+</slide>
+
+<slide>
+# Why each one cannot be default
+
+| Header | Why not on by default |
+|---|---|
+| CSP | Old code uses inline scripts and `eval`. Only the site knows which scripts are legitimate |
+| HSTS | A promise from the server. Forced HTTPS makes HTTP-only sites unreachable |
+| Frame options | Many sites are embedded legitimately: widgets, payment windows |
+| `nosniff` | Some old servers relied on the guessing |
+</slide>
+
+<slide>
+# When browsers dared to change
+
+* **SameSite `Lax` by default** in Chrome: from Chrome 80 (Feb 2020), paused, done in Chrome 91. Over a year
+* **Referrer-Policy** defaults to `strict-origin-when-cross-origin`
+* **Mixed content**: HTTP on an HTTPS page is upgraded or blocked
+
+Express does not include Helmet either: Express is minimal on purpose, Helmet chooses "on if it rarely breaks anything".
+
+
+</slide>
+
+<slide>
+# The slogan
+
+**The browser chooses what breaks nobody.**
+
+**You know what your site needs, so you tighten it.**
+</slide>
+
+<slide>
+# Why did we configure CSP?
+
+* Helmet's default has `script-src 'self'`: no inline scripts
+* The built Svelte `index.html` has an inline `&lt;script>` that starts the client
+* Blocked, so the page goes white
+* Fix: compute a **SHA-256 hash** of the script at server start and allow exactly that hash
+</slide>
+
+<slide>
+# `src/config/csp.ts`
+
+```ts
+export function clientScriptHashes(file = INDEX): string[] {
+  const html = readFileSync(file, 'utf8')
+  const scripts = html.matchAll(/&lt;script>([\s\S]*?)&lt;\/script>/g)
+  return Array.from(scripts, (match) => {
+    const hash = createHash('sha256').update(match[1])
+    return `'sha256-${hash.digest('base64')}'`
+  })
+}
+```
+
+Used as `'script-src': ["'self'", ...clientScriptHashes()]`
+</slide>
+
+<slide>
+# Why a hash?
+
+* The browser hashes every inline script itself and compares with the list
+* One changed character and it does not match, the script does not run
+* `'unsafe-inline'` would let in **all** inline scripts, injected ones too
+* A rebuilt client gets a new hash after a restart, no code change
+</slide>
+
+
+<slide title>
+# bcrypt
+## Where is the salt, and what is pepper?
+</slide>
+
+<slide>
+# What we protect against
+
+* An attacker gets hold of the database: injection, a leaked backup
+* We never store the password, only a hash of it
+</slide>
+
+<slide>
+# Same password, two hashes
+
+```ts
+const a = await bcrypt.hash('hemligt', 12)
+const b = await bcrypt.hash('hemligt', 12)
+
+await bcrypt.compare('hemligt', a)  // true
+await bcrypt.compare('hemligt', b)  // true
+```
+
+```text
+$2a$12$XdKqxTWzWuirlpRSQoBKO.S.xt2E192qZxnOuYRTDYaBXVg1ubY9q
+$2a$12$7WL867NcW4DgvOU9dqPx1OEWhA8Soo3mFifo7NdzXHhwm3J5bV6gS
+```
+</slide>
+
+<slide>
+# A bcrypt hash, piece by piece
+
+```text
+$2a$12$XdKqxTWzWuirlpRSQoBKO.S.xt2E192qZxnOuYRTDYaBXVg1ubY9q
+ |  |  |                      |
+ |  |  |                      └─ 31 chars: the hash
+ |  |  └─ 22 chars: the salt (random)
+ |  └─ cost factor 12 (2^12 = 4096 rounds)
+ └─ algorithm version
+```
+
+60 characters, always.
+</slide>
+
+<slide>
+# `hash` and `compare`
+
+* `bcrypt.hash(password, 12)`: 12 is the **cost**, not the salt. A new salt is generated every time
+* `bcrypt.compare(password, stored)`: reads cost and salt from `stored`, hashes the input with them and compares
+* No salt column needed, and never compare hashes with `===`
+* Cost 12 ≈ a quarter of a second per hash. That is why `/login` is rate limited
+</slide>
+
+<slide>
+# The salt is visible. Why does it help?
+
+**Without salt:** `hemligt` always gives the same hash. Build a lookup table **once**, crack everyone.
+
+**With salt, even if it is read:**
+
+* A precomputed table is useless, it would have to be rebuilt per salt
+* Guessing is per user: 100 000 users, 100 000 separate jobs
+* Two users with the same password get different hashes
+</slide>
+
+<slide>
+# Salt and cost do different things
+
+| | Protects against |
+|---|---|
+| Salt | Precomputed tables, one job cracking everyone |
+| Cost factor | Each single guess being fast |
+
+The salt makes the attacker start over for every user. The cost makes every attempt take time.
+</slide>
+
+<slide>
+# Pepper: a secret outside the database
+
+| | Salt | Pepper |
+|---|---|---|
+| Unique per user | yes | no, same for all |
+| Stored | in the hash | **outside** the database |
+| Secret | no | yes |
+| Protects against | precomputed tables | a stolen database being enough |
+
+The pepper lives in an env variable or a secret manager.
+</slide>
+
+<slide>
+# Why pepper is not everywhere
+
+* If the pepper leaks (same server, same env), its value is gone
+* It cannot be changed without the users' passwords: everyone must reset
+* More to operate, more that can go wrong
+* Our solution uses no pepper. `JWT_SECRET` is a secret too, but signs tokens
+
+> "Consider using a pepper to provide additional defense in depth (though alone, it provides no additional secure characteristics)."
+
+<reference>[OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)</reference>
+</slide>
+
+<slide>
+# Two pitfalls
+
+**72 bytes.** bcrypt only uses the first 72 bytes. Our Zod rule has `min(8)` but no `max`. Set one: `å`, `ä`, `ö` and emoji take several bytes.
+
+**The same error message.** `login` throws `'Invalid credentials'` for wrong email and wrong password, so nobody can list accounts. But `register` says `'Email already in use'`: a trade-off between security and usability.
+</slide>
+
+<slide title>
+# Regex for everyday use
+## Describe a pattern, not an exact text
+</slide>
+
+<slide>
+# In VS Code
+
+| Keys | What |
+|---|---|
+| `Ctrl+F` + `.*` | Search in the file with regex |
+| `Ctrl+H` | Replace |
+| `Ctrl+Shift+F` | Search in all files |
+
+What you search for does not have to be known in advance, only what it looks like.
+</slide>
+
+<slide>
+# Building blocks (1/3)
+
+| Pattern | Means | Example |
+|---|---|---|
+| `.` | any character except newline | `h.j`: `hej`, `hoj` |
+| `\d` | a digit | `\d\d\d\d`: `2026` |
+| `\w` | letter, digit or `_` | |
+| `\s` / `\S` | whitespace / not whitespace | |
+| `*` | zero or more | `ab*`: `a`, `abbb` |
+</slide>
+
+<slide>
+# Building blocks (2/3)
+
+| Pattern | Means | Example |
+|---|---|---|
+| `+` | one or more | `\d+`: `7`, `12345` |
+| `?` | zero or one | `colou?r` |
+
+| Pattern | Means | Example |
+|---|---|---|
+| `{3}` / `{2,4}` | exact count / range | `\d{4}` |
+| `[a-z]` / `[^abc]` | one of / **not** these | |
+</slide>
+
+<slide>
+# Building blocks (3/3)
+
+| Pattern | Means | Example |
+|---|---|---|
+| `^` / `$` | start / end of line | `^import` |
+| `\b` | word boundary | `\bid\b`: not `userId` |
+| `a\|b` | a or b | |
+| `( )` | group and capture | |
+| `\.` | a literal dot | `index\.ts` |
+</slide>
+
+<slide>
+# Common pitfalls
+
+* `.` is any character: `index.ts` also matches `indexXts`
+* `*` and `+` are **greedy**: `".*"` on `"a" och "b"` takes all of it.
+* `\w` does **not** match `å`, `ä`, `ö` in JavaScript. Use `[\wåäöÅÄÖ]` or `[^,\s]`
+* Case: turn on "Aa" in VS Code, or the `i` flag
+</slide>
+
+<slide>
+# Searching (1/2)
+
+| Task | Pattern |
+|---|---|
+| All `import` lines | `^import .* from` |
+| TODO or FIXME | `TODO\|FIXME` |
+| Trailing whitespace | `\s+$` |
+</slide>
+
+<slide>
+# Searching (2/2)
+
+| Task | Pattern |
+|---|---|
+| Relative `.js` imports | `from '\.\.?/.*\.js'` |
+| All routes | `\.(get\|post\|patch\|delete)\(` |
+| Four-digit numbers | `\b\d{4}\b` |
+</slide>
+
+<slide>
+# Replace with capture groups
+
+Parentheses **capture**, `$1`, `$2` reuse it (`\1` in `sed`).
+
+```text
+Svensson, Anna      →   Anna Svensson
+Lindberg, Erik      →   Erik Lindberg
+```
+
+* Search: `(\w+), (\w+)`
+* Replace: `$2 $1`
+</slide>
+
+<slide>
+# More replacements
+
+| Task | Search | Replace |
+|---|---|---|
+| `console.log` to logger | `console\.log\((.*)\)` | `logger.info($1)` |
+| Markdown link to HTML | `\[(.*?)\]\((.*?)\)` | `&lt;a href="$2">$1&lt;/a>` |
+| Bullet list | `^(.+)$` | `- $1` |
+
+**Always:** check the preview, use git, show `git diff` afterwards.
+</slide>
+
+<slide>
+# Regex in code
+
+* Zod: `z.string().regex(/^[A-Z]{3,10}$/)`, what does it match?
+* `csp.ts`: `/&lt;script>([\s\S]*?)&lt;\/script>/g`
+  * `[\s\S]` = any character, including newline
+  * `*?` = non-greedy, stops at the first `&lt;/script>`
+  * The group captures the content that is hashed
+* JavaScript: `str.replace(/\s+/g, ' ')`, `re.test(str)`, `str.match(re)`
+</slide>
+
+<slide>
+# When not to use regex
+
+* Not for parsing HTML or JSON for real, use a parser
+* The `csp.ts` regex works because we control `index.html`
+* There is no "fully correct" email regex: use `z.string().email()`
+* Draw the pattern first in **regex101.com** (flavor JavaScript) or **regexr.com**
+
+<reference>[regex101](https://regex101.com/)</reference>
+</slide>
+
+<slide>
+# Mini exercise
+
+Open `lektion-kmom03-exempel.txt` and write patterns for:
+
+1. All lines starting with `ERROR`
+2. All mobile numbers like `070-123 45 67`
+3. Change `2026-11-17` to `17/11/2026` with capture groups
+</slide>
+
+<slide>
+# Answers
+
+1. `^ERROR`
+2. `\d{3}-\d{3} \d{2} \d{2}`
+3. Search `(\d{4})-(\d{2})-(\d{2})`, replace `$3/$2/$1`
+
+Did your pattern for 1 also catch the line with `ERROR` in the middle?
+</slide>
+
+<slide>
+# Three things to take with you
+
+1. **Site and origin differ.** SameSite is about site, CORS about origin
+2. **The browser enforces the rules.** CORS stops reading, not the request. Several layers are needed
+3. **The salt is in the hash**, and the cost makes guessing expensive
+
+Regex: start with **search**, then **replace with `$1`**.
+</slide>
+
+<slide reference-summary>
+# References
+</slide>
+
+<slide title>
+# The end
+</slide>
+
+<slide></slide>
+
+<script src="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.js"></script>
+
+</html>
