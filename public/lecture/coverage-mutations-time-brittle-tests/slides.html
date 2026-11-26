@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="monokai">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What do the tests actually tell us?</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.css">
+
+<slide title>
+# What do the tests actually tell us?
+## Coverage, mutations, time, randomness and brittle tests
+</slide>
+
+<slide>
+# Today
+
+| | Topic |
+|---|---|
+| 1 | Coverage can be fooled |
+| 2 | Mutation testing |
+| 3 | Time and randomness in tests |
+| 4 | Test behavior, not implementation |
+| 5 | Questions and summary |
+</slide>
+
+<slide>
+# The red thread
+
+**Green tests do not mean the code works.**
+
+**They mean no test found an error.**
+
+| Tests that are | Block |
+|---|---|
+| Too **weak**: ran the code, checked nothing | Coverage and mutations |
+| **Unreliable**: depend on time and randomness | Time and randomness |
+| Too **brittle**: alarm when nothing is wrong | Behavior vs implementation |
+</slide>
+
+<slide title>
+# Coverage can be fooled
+## From 73 % to 89 % without testing anything
+</slide>
+
+<slide>
+# Where we start
+
+```bash
+npm run test:coverage
+```
+
+* Coverage is measured on `src/services/**` and `src/repositories/**`
+* Threshold: 70 % of the lines
+* We are at about **73 %**
+* Missing: `changePassword` in `auth.service.ts`
+
+**Question:** we want to get above 80 %. What is the fastest way?
+</slide>
+
+<slide>
+# A test that tests nothing
+
+```ts
+vi.mock('../repositories/user.repository.js')
+
+it('changePassword runs', async () => {
+  vi.mocked(userRepository.findByPublicId).mockResolvedValue({
+    password: bcrypt.hashSync('old', 4),
+  } as never)
+  await authService.changePassword('u1', 'old', 'new')
+})
+```
+</slide>
+
+<slide>
+# What actually happened
+
+* `auth.service.ts`: **100 %** lines. Total: **89 %**
+* Not a single `expect`
+* `changePassword` **ran**, but nothing checks that the password changed or that a wrong one is rejected
+* The coverage threshold in CI would let it through
+
+A test easily becomes a **run-through** instead of a **check**. Even with good intentions, and especially with AI-generated tests.
+</slide>
+
+<slide title>
+# Mutation testing
+## Change the code and see if anything notices
+</slide>
+
+<slide>
+# The idea
+
+* A tool makes small changes, **mutants**, to the code
+* `!valid` becomes `valid`, a condition becomes `false`, a string is emptied
+* The tests run after each change
+* No test turns red: the mutant **survived**
+* A surviving mutant is a line the tests do not protect
+</slide>
+
+<slide>
+# By hand first
+
+| Change | Result |
+|---|---|
+| `login`: `!valid` → `valid` | Caught, 4 route tests red |
+| `changePassword`: `!valid` → `valid` | Caught, by the no-assert test |
+| `changePassword`: `!valid` → `false` | **Survived** |
+| `changePassword`: hash `currentPassword` | **Survived** |
+| `register`: cost `12` → `1` | **Survived** |
+</slide>
+
+<slide>
+# What the rows tell us
+
+* **Row 2:** a thrown error turns a test red, even without `expect`. A run-through catches crashes, nothing more
+* **Row 3:** anyone with a session changes the password without knowing it
+* **Row 4:** the password is never changed
+* **Row 5:** bcrypt cost from 12 to 1, and no test protests
+</slide>
+
+<slide>
+# Stryker
+
+```bash
+npx stryker run
+```
+
+* 32 mutants, mutation score about **67 %**
+* `changePassword` emptied to `{}`: **all tests green**
+* `if (!user)` and `if (!valid)` become `if (false)`
+* `expiresIn: '7d'` becomes `{}`: nobody notices the token never expires
+
+Stryker does not mutate numbers: cost 12 → 1 is not in its list.
+
+<reference>[Stryker Mutator](https://stryker-mutator.io/)</reference>
+</slide>
+
+<slide>
+# Fix it: what should be checked?
+
+* The **new** password was actually saved
+* A wrong current password is rejected
+* Nothing is saved when it is rejected
+</slide>
+
+<slide>
+# The new password was saved
+
+```ts
+it('saves a hash of the new password', async () => {
+  vi.mocked(userRepository.findByPublicId).mockResolvedValue({
+    password: bcrypt.hashSync('old', 4),
+  } as never)
+  await authService.changePassword('u1', 'old', 'new')
+  const [id, saved] =
+    vi.mocked(userRepository.updatePassword).mock.calls[0]
+  expect(id).toBe('u1')
+  expect(await bcrypt.compare('new', saved)).toBe(true)
+})
+```
+</slide>
+
+<slide>
+# A wrong password is rejected
+
+```ts
+it('rejects a wrong current password', async () => {
+  vi.mocked(userRepository.findByPublicId).mockResolvedValue({
+    password: bcrypt.hashSync('old', 4),
+  } as never)
+  await expect(
+    authService.changePassword('u1', 'wrong', 'new'),
+  ).rejects.toThrow('Current password is incorrect')
+  expect(userRepository.updatePassword).not.toHaveBeenCalled()
+})
+```
+</slide>
+
+<slide>
+# Still surviving
+
+Stryker: from about 67 % to about **79 %**.
+
+* `if (!user)` in `changePassword`: no test for an unknown user. What would it look like?
+* `expiresIn: '7d'`: how do we test that a token expires after 7 days?
+</slide>
+
+<slide>
+# Coverage versus mutation testing
+
+| | Asks | Cost |
+|---|---|---|
+| Coverage | *Did the line run?* | Cheap, a good floor |
+| Mutation testing | *Would anything notice if the line were wrong?* | Slow, every mutant runs tests |
+
+* That is why the threshold is 70 %, not 100 %
+* And why it is not the whole truth
+* Mutation testing is used on selected files, rarely in CI on every push
+* Perform manual mutation testing while writing tests
+</slide>
+
+<slide title>
+# Time and randomness
+## Tests should own what is otherwise unpredictable
+</slide>
+
+<slide>
+# The problem with time
+
+* `login` creates a JWT with `expiresIn: '7d'`
+* Is the token valid after 6 days and invalid after 8?
+* Waiting a week is not an option
+* `expiresIn: '1s'` and sleeping does not test the production code
+
+Time also matters for cookies, retries, rate limiting and signed webhooks.
+</slide>
+
+
+<slide>
+# Fake the clock (1/3)
+
+```ts
+it('token expires after 7 days', async () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+  vi.mocked(userRepository.findByEmail).mockResolvedValue({
+    publicId: 'u1', email: 'e', name: 'n',
+    password: bcrypt.hashSync('pw', 4),
+  } as never)
+  const { token } = await authService.login('e', 'pw')
+```
+
+`useFakeTimers` takes over `Date`. `setSystemTime` sets "now".
+</slide>
+
+
+<slide>
+# Fake the clock (2/3)
+
+```ts
+  const verify = () => jwt.verify(token, env.JWT_SECRET)
+
+  vi.setSystemTime(new Date('2026-01-07T23:59:59Z'))
+  expect(verify).not.toThrow()
+
+  vi.setSystemTime(new Date('2026-01-08T00:00:01Z'))
+  expect(verify).toThrow('jwt expired')
+})
+```
+
+Jump forward and verify. No waiting.
+</slide>
+
+
+
+
+<slide>
+# Fake the clock (3/3)
+
+```ts
+afterEach(() => {
+  vi.useRealTimers()
+  vi.resetAllMocks()
+})
+```
+
+* `vi.useRealTimers()` after each test
+* Otherwise the fake clock leaks into the other tests in the file
+</slide>
+
+
+<slide>
+# The mutant dies
+
+* `expiresIn: '7d'` → `{}` is now killed
+* A token without `exp` would never throw `jwt expired`
+* With the fix and this test: mutation score about **83 %**
+</slide>
+
+<slide>
+# Pitfalls with fake timers
+
+* **Forget `useRealTimers`** and the fake clock leaks into other tests
+* **Fake timers and real I/O mix badly**: anything waiting on `setTimeout` hangs when the clock stands still
+* Fake in unit tests with mocked repositories, not with a real database
+* Fake only the clock: `vi.useFakeTimers({ toFake: ['Date'] })`
+
+<reference>[Vitest, fake timers](https://vitest.dev/api/vi.html#vi-usefaketimers)</reference>
+
+</slide>
+
+<slide>
+# Randomness: the same problem
+
+The test does not know the value in advance.
+
+* `create` sets `publicId: nanoid()`, a new random id per user
+* `bcrypt.hash` draws a new salt every time
+</slide>
+
+<slide>
+# Three ways to handle it
+
+1. **Test the property, not the value**
+
+```ts
+expect(user.publicId).toMatch(/^[\w-]{21}$/)
+```
+
+2. **Mock the source**
+
+```ts
+vi.mock('nanoid', () => ({ nanoid: () => 'fixed-id' }))
+```
+
+3. **Inject it:** the function takes an id generator, `nanoid` by default
+</slide>
+
+<slide>
+# Flaky tests
+
+* A test that is sometimes red is **worse than no test**
+* People stop trusting it and rerun until it turns green
+* Time and randomness are the most common causes
+</slide>
+
+<slide>
+# What is cryptographic randomness?
+
+* A computer cannot roll dice: most randomness is **pseudo-random**, a formula from a start value
+* `Math.random()` is fast and evenly spread, fine for games
+* But it is not built to be unpredictable: seen a few outputs, you can predict the next
+</slide>
+
+<slide>
+# A CSPRNG
+
+* Seeded with noise from the operating system
+* Nobody can predict the next value, even with all the earlier ones
+* Node: `crypto.randomBytes()`, `crypto.randomUUID()`, `crypto.getRandomValues()`
+* `nanoid` uses it
+
+Never `Math.random()` for tokens or reset links.
+
+<reference>[MDN, Crypto.getRandomValues()](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues)</reference>
+</slide>
+
+<slide title>
+# Test behavior, not implementation
+## A test should alarm when the behavior changes, not when the code changes
+</slide>
+
+<slide>
+# Behavior and side effects
+
+* **Behavior:** everything visible from outside the function
+  * The return value
+  * Thrown errors
+  * **Side effects:** what it changes outside itself, the database, a cookie
+* **Implementation:** *how* it gets there, which helpers are called and in what order
+</slide>
+
+<slide>
+# `changePassword` has only a side effect
+
+* It returns nothing
+* Its whole behavior **is** the side effect: the password in the database changes
+* Checking what reached `updatePassword` checks the side effect at the database boundary
+* That is behavior
+</slide>
+
+<slide>
+# An over-mocked test
+
+```ts
+vi.mock('bcryptjs')
+vi.mock('../repositories/user.repository.js')
+
+it('changePassword', async () => {
+  vi.mocked(userRepository.findByPublicId).mockResolvedValue(
+    { publicId: 'u1', password: 'stored-hash' } as never)
+  vi.mocked(bcrypt.compare).mockResolvedValue(true as never)
+  vi.mocked(bcrypt.hash).mockResolvedValue('new-hash' as never)
+  await authService.changePassword('u1', 'old', 'new')
+```
+</slide>
+
+<slide>
+# Every call checked
+
+```ts
+  expect(userRepository.findByPublicId)
+    .toHaveBeenCalledWith('u1')
+  expect(bcrypt.compare)
+    .toHaveBeenCalledWith('old', 'stored-hash')
+  expect(bcrypt.hash).toHaveBeenCalledWith('new', 12)
+  expect(userRepository.updatePassword)
+    .toHaveBeenCalledWith('u1', 'new-hash')
+})
+```
+
+Green, four `expect`, 100 % of the happy path. **Question:** is this a good test?
+</slide>
+
+<slide>
+# A copy of the code
+
+* Every line in `changePassword` has a matching `toHaveBeenCalledWith`
+* It tests the **recipe**: which functions, with which arguments
+* Not the **result**: that the password actually changed
+* `'new-hash'` was made up by the mock, it says nothing about a working password
+</slide>
+
+<slide>
+# Change 1: a harmless refactoring
+
+```ts
+const hashed = await bcrypt.hash(newPassword, 12)
+```
+
+becomes
+
+```ts
+const salt = await bcrypt.genSalt(12)
+const hashed = await bcrypt.hash(newPassword, salt)
+```
+
+* Exactly the same behavior: same cost, new salt
+* The over-mocked test: **red**
+</slide>
+
+<slide>
+# Change 2: a real bug
+
+```ts
+const valid = bcrypt.compare(currentPassword, user.password)
+```
+
+* `valid` is a `Promise`, always truthy, so `if (!valid)` never fires
+* Whoever gets hold of a logged-in session changes the password without knowing it
+* The over-mocked test: **green**
+* Neither `typecheck` nor `lint` finds it
+</slide>
+
+<slide>
+# Worse than no test
+
+| | Over-mocked test |
+|---|---|
+| Harmless refactoring | Red: false alarm |
+| Real bug | Green: missed |
+
+* It costs on every refactoring and protects nothing
+* People learn to "fix the test" by updating the mocks until it is green
+</slide>
+
+<slide>
+# What does the user care about?
+
+* The new password works
+* The old one does not
+* A wrong current password is rejected, and nothing is saved
+</slide>
+
+<slide>
+# A behavior test (1/3)
+
+```ts
+vi.mock('../repositories/user.repository.js')
+
+beforeEach(() => {
+  vi.resetAllMocks()
+  vi.mocked(userRepository.findByPublicId).mockResolvedValue({
+    publicId: 'u1',
+    password: bcrypt.hashSync('old', 4),
+  } as never)
+})
+```
+
+bcrypt runs for real. Only the database boundary is mocked.
+</slide>
+
+<slide>
+# A behavior test (2/3)
+
+```ts
+it('the new password works, the old does not', async () => {
+  await authService.changePassword('u1', 'old', 'new')
+
+  const [id, saved] =
+    vi.mocked(userRepository.updatePassword).mock.calls[0]
+  expect(id).toBe('u1')
+  expect(await bcrypt.compare('new', saved)).toBe(true)
+  expect(await bcrypt.compare('old', saved)).toBe(false)
+})
+```
+</slide>
+
+<slide>
+# A behavior test (3/3)
+
+```ts
+it('rejects a wrong password, saves nothing', async () => {
+  await expect(
+    authService.changePassword('u1', 'wrong', 'new'),
+  ).rejects.toThrow('Current password is incorrect')
+  expect(userRepository.updatePassword).not.toHaveBeenCalled()
+})
+```
+</slide>
+
+<slide>
+# The same two changes
+
+| | Over-mocked test | Behavior test |
+|---|---|---|
+| Harmless refactoring | Red: false alarm | Green |
+| Real bug | Green: missed | **Red** |
+</slide>
+
+<slide>
+# What made the difference
+
+* **bcrypt runs for real:** a pure function, no reason to mock it
+* **Mock what you do not own or what is slow:** database, network, clock. Not your own logic
+<reference>[Vitest, mocking](https://vitest.dev/guide/mocking.html)</reference>
+* **Check the result, not the calls:** can you log in with what was saved?
+* **The error case is there:** that is what caught the bug
+* **Both return value and side effects:** `register` returns the user *and* saves it
+</slide>
+
+<slide>
+# One step further: an integration test
+
+* Supertest and `mongodb-memory-server`
+* Register, `PATCH /api/me/password`, log in with the new password
+* No mocks at all, survives replacing the repository
+* The price: slower, and a red test points less precisely at the error
+
+Many fast behavior unit tests, fewer integration tests.
+</slide>
+
+<slide>
+# Three things to take with you
+
+1. Coverage tells you what **ran**. Mutation testing tells you what is **protected**
+2. Time, randomness and network make tests unreliable. Let the test control them
+3. Test the **result**: what the function returns **and** what it changes. Not how it does it
+
+A test that is red on every refactoring but green on a real bug is worse than none.
+</slide>
+
+<slide reference-summary>
+# References
+</slide>
+
+<slide title>
+# The end
+</slide>
+
+<slide></slide>
+
+<script src="https://cdn.jsdelivr.net/npm/@mosbth/htmlslides/dist/htmlslides.js"></script>
+</html>
